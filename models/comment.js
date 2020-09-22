@@ -22,7 +22,8 @@ const commentSchema = new Schema({
         ref: 'User'
     },
     article: {
-        type: [Schema.Types.ObjectId],
+        type: Schema.Types.ObjectId,
+        required: [true, 'article required'],
         ref: 'Article'
     }
 }, {timestamps: true});

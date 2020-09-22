@@ -21,11 +21,11 @@ const replySchema = new Schema({
         ref: 'User'
     },
     article: {
-        type: [Schema.Types.ObjectId],
+        type: Schema.Types.ObjectId,
         ref: 'Article'
     },
     comment: {
-    type: [Schema.Types.ObjectId],
+    type: Schema.Types.ObjectId,
         ref: 'Article'
 }
 }, {timestamps: true});

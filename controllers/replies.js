@@ -10,37 +10,53 @@ exports.createReply = async (req, res) => {
         });
 
         await reply.save();
-        reply = await Reply.findById(reply._id);
+        reply = await Reply.findById(reply._id)
+            .populate({
+                path: 'author',
+                select: 'name username avatar'
+            });
         return res.status(201).json({data: reply});
-    }catch (e) {
+    } catch (e) {
         return res.status(500).json({error: e.message});
     }
 }
 
 exports.getReply = async (req, res) => {
     try {
-        const reply = await Reply.findById(req.params.id);
-        if(!reply){
+        const reply = await Reply.findById(req.params.id)
+            .populate({
+                path: 'author',
+                select: 'name username avatar'
+            });
+        if (!reply) {
             return res.status(400).json({error: 'comment not found'});
         }
         return res.status(200).json({data: reply});
-    }catch (e) {
+    } catch (e) {
         return res.status(500).json({error: e.message});
     }
 }
 
 exports.getReplies = async (req, res) => {
     try {
-        const replies = await Reply.find({comment: req.body.comment, article: req.body.article});
+        const replies = await Reply.find({comment: req.body.comment, article: req.body.article})
+            .populate({
+                path: 'author',
+                select: 'name username avatar'
+            });
         return res.status(200).json({data: replies});
-    }catch (e) {
+    } catch (e) {
         return res.status(500).json({error: e.message});
     }
 }
 
 exports.updateReply = async (req, res) => {
     try {
-        let reply = await Reply.findOne({author: req.user._id, _id: req.params.id});
+        let reply = await Reply.findOne({author: req.user._id, _id: req.params.id})
+            .populate({
+                path: 'author',
+                select: 'name username avatar'
+            });
         if (!reply) {
             return res.status(404).json({error: 'action not allowed'});
         }
@@ -55,7 +71,7 @@ exports.updateReply = async (req, res) => {
         }
         await reply.save();
         return res.status(200).json({data: reply});
-    }catch (e) {
+    } catch (e) {
         return res.status(500).json({error: e.message});
     }
 }
@@ -68,7 +84,7 @@ exports.deleteReply = async (req, res) => {
         }
         await reply.remove();
         return res.status(200).json({data: reply});
-    }catch (e) {
+    } catch (e) {
         return res.status(500).json({error: e.message});
     }
 }

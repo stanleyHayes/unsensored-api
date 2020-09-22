@@ -4,35 +4,33 @@ const User = require("../models/user");
 exports.auth = async (req, res, next) => {
 
     try {
-        if(!req.headers.authorization){
+        if (!req.headers.authorization) {
             return res.status(401).json({error: 'Authorization failed'});
         }
 
         const token = req.headers.authorization.split(" ")[1];
-        if(!token){
+        if (!token) {
             return res.status(401).json({error: 'Authorization failed'});
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findOne({_id: decoded._id, "tokens.token": token});
-        if(!user){
+        if (!user) {
             return res.status(401).json({error: 'Authorization failed'});
         }
         req.user = user;
         req.token = token;
         next();
-    }catch (e){
+    } catch (e) {
         res.status(500).json({error: e.message});
     }
 
 
-
-
 }
 
-exports.authorize = async (...roles) => {
+exports.authorize = (...roles) => {
     return (req, res, next) => {
-        if(roles.includes(req.user.role)){
+        if (roles.includes(req.user.role)) {
             next();
         }
         throw new Error('unauthorized to access this route');

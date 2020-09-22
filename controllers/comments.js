@@ -9,7 +9,11 @@ exports.createComment = async (req, res) => {
         });
 
         await comment.save();
-        comment = await Comment.findById(comment._id);
+        comment = await Comment.findById(comment._id)
+            .populate({
+                path: 'author',
+                select: 'name username avatar'
+            });
         return res.status(201).json({data: comment});
     } catch (e) {
         return res.status(500).json({error: e.message});
@@ -18,8 +22,12 @@ exports.createComment = async (req, res) => {
 
 exports.getComment = async (req, res) => {
     try {
-        const comment = await Comment.findById(req.params.id);
-        if(!comment){
+        const comment = await Comment.findById(req.params.id)
+            .populate({
+                path: 'author',
+                select: 'name username avatar'
+            });
+        if (!comment) {
             return res.status(400).json({error: 'comment not found'});
         }
         return res.status(200).json({data: comment});
@@ -30,7 +38,11 @@ exports.getComment = async (req, res) => {
 
 exports.getComments = async (req, res) => {
     try {
-        const comments = await Comment.find({article: req.body.article});
+        const comments = await Comment.find({article: req.body.article})
+            .populate({
+                path: 'author',
+                select: 'name username avatar'
+            });
         return res.status(200).json({data: comments});
     } catch (e) {
         return res.status(500).json({error: e.message});
@@ -39,9 +51,13 @@ exports.getComments = async (req, res) => {
 
 exports.updateComment = async (req, res) => {
     try {
-        let comment = await Comment.findOne({author: req.user._id, _id: req.params.id});
+        let comment = await Comment.findOne({author: req.user._id, _id: req.params.id})
+            .populate({
+                path: 'author',
+                select: 'name username avatar'
+            });
         if (!comment) {
-            return res.status(404).json({error: 'action not allowed'});
+            return res.status(404).json({error: 'comment not found'});
         }
         const allowedUpdates = ['text'];
         const updates = Object.keys(req.body);
