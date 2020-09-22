@@ -23,7 +23,7 @@ articleError = (error, req, res, next) => {
 
 router.post('/', auth, article.single('banner'), createArticle, articleError);
 router.get('/', auth, getArticles);
-router.get('/timeline', getArticles);
+router.get('/timeline', getArticlesBySubscriptions);
 router.delete('/:id', auth, deleteArticle);
 router.patch('/:id', auth, updateArticle);
 router.get('/:id', getArticle);

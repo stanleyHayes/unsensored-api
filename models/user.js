@@ -43,6 +43,15 @@ const userSchema = new Schema({
     subscriptions: {
         type: [String]
     },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    role: {
+        type: String,
+        enum: ['USER', 'ADMIN', 'SUPER_ADMIN'],
+        default: 'USER'
+    },
     tokens: {
         type: [
             {

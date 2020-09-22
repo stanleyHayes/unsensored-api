@@ -1,7 +1,7 @@
 const express = require("express");
 
-const {createReply, deleteReply, getReplies, getReply, updateReply} = require("../controllers/replies");
 const {auth} = require("../middleware/auth");
+const {createReply, deleteReply, getReplies, getReply, updateReply} = require("../controllers/replies");
 const router = express.Router({mergeParams: true});
 
 router.post('/', auth, createReply);

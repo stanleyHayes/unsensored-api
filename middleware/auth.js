@@ -29,3 +29,12 @@ exports.auth = async (req, res, next) => {
 
 
 }
+
+exports.authorize = async (...roles) => {
+    return (req, res, next) => {
+        if(roles.includes(req.user.role)){
+            next();
+        }
+        throw new Error('unauthorized to access this route');
+    }
+}
