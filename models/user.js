@@ -82,7 +82,6 @@ userSchema.pre('save', async function (next) {
     next();
 });
 
-
 userSchema.methods.getToken = async function (fields) {
     const token = jwt.sign({_id: this._id.toString()}, process.env.JWT_SECRET, {});
 
@@ -101,6 +100,13 @@ userSchema.methods.getToken = async function (fields) {
 userSchema.methods.matchPassword = function (password) {
     return bcrypt.compare(this.password, password);
 }
+
+userSchema.virtual('articles', {
+    localField: '_id',
+    foreignField: 'author',
+    justOne: false,
+    ref: 'Article'
+});
 
 const User = mongoose.model('User', userSchema);
 

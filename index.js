@@ -41,6 +41,7 @@ if (process.env.NODE_ENV === 'development') {
 
 
 app.use('/api/v1/auth', require('./routes/authentication'));
+app.use('/api/v1/articles', require('./routes/articles'));
 
 app.listen(process.env.PORT || 8000, () => {
     console.log(`Server connected in ${process.env.NODE_ENV} on port ${process.env.PORT}`)
