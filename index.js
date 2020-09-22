@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const rateLimiter = require('express-rate-limit');
+const useragent = require("express-useragent");
 
 dotenv.config({path: './config/config.env'});
 
@@ -27,14 +28,19 @@ const limiter = rateLimiter({
     windowMs: 15 * 1000 * 60
 });
 
+app.use(useragent.express());
 app.use(express.json());
+app.use(express.urlencoded({extended: true}));
 app.use(helmet());
 app.use(cors());
 app.use(limiter);
 
 if (process.env.NODE_ENV === 'development') {
-    app.use(morgan.format('dev'));
+    app.use(morgan('dev'));
 }
+
+
+app.use('/api/v1/auth', require('./routes/authentication'));
 
 app.listen(process.env.PORT || 8000, () => {
     console.log(`Server connected in ${process.env.NODE_ENV} on port ${process.env.PORT}`)
