@@ -38,11 +38,21 @@ exports.getComment = async (req, res) => {
 
 exports.getComments = async (req, res) => {
     try {
-        const comments = await Comment.find({article: req.body.article})
-            .populate({
-                path: 'author',
-                select: 'name username avatar'
-            });
+        let comments = [];
+        //api/v1/users/:user/comments
+        if (req.params.user) {
+            comments = await Comment({author: req.params.user})
+                .populate({
+                    path: 'author',
+                    select: 'name username avatar'
+                });
+        } else {
+            comments = await Comment.find({article: req.body.article})
+                .populate({
+                    path: 'author',
+                    select: 'name username avatar'
+                });
+        }
         return res.status(200).json({data: comments});
     } catch (e) {
         return res.status(500).json({error: e.message});

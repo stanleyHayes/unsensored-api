@@ -41,7 +41,16 @@ const articleSchema = new Schema({
     likes: {
         type: [Schema.Types.ObjectId],
         ref: 'User'
-    }
+    },
+    views: {
+        type: [Schema.Types.ObjectId],
+        ref: 'View'
+    },
+    comments: {
+        type: [Schema.Types.ObjectId],
+        ref: 'Comment'
+    },
+
 }, {timestamps: true});
 
 articleSchema.pre('remove', async function (next) {

@@ -46,30 +46,27 @@ exports.getArticles = async (req, res) => {
         let tags;
 
         //logged in user
-        if (req.user) {
-            tags = req.user.subscriptions;
-            if (tags.length === 0) {
-                query = Article.find({published: true})
-                    .skip(skip)
-                    .limit(limit)
-                    .sort(sort)
-                    .populate({
-                        path: 'author',
-                        select: 'avatar name username'
-                    });
-            } else {
-                query = Article.find({tags: {$all: tags}, published: true})
-                    .skip(skip)
-                    .limit(limit)
-                    .sort(sort)
-                    .populate({
-                        path: 'author',
-                        select: 'avatar name username'
-                    });
-            }
-        }
-        //anonymous user
-        else {
+        tags = req.user.subscriptions;
+        if (tags.length > 0) {
+            query = Article.find({tags: {$all: tags}, published: true})
+                .skip(skip)
+                .limit(limit)
+                .sort(sort)
+                .populate({
+                    path: 'author',
+                    select: 'avatar name username'
+                });
+        } else if (req.params.user) {
+            query = Article.find({author: req.params.user})
+                .skip(skip)
+                .limit(limit)
+                .sort(sort)
+                .populate({
+                    path: 'author',
+                    select: 'avatar name username'
+                });
+        } else {
+
             query = Article.find({published: true})
                 .skip(skip)
                 .limit(limit)
@@ -137,8 +134,6 @@ exports.getArticlesBySubscriptions = async (req, res) => {
         }
         let tags;
 
-        //logged in user
-        if (req.user) {
             tags = req.user.subscriptions;
             if (tags.length === 0) {
                 query = Article.find({published: true})
@@ -149,7 +144,7 @@ exports.getArticlesBySubscriptions = async (req, res) => {
                         path: 'author',
                         select: 'avatar name username'
                     });
-            } else {
+            } else if(tags > 0) {
                 query = Article.find({tags: {$all: tags}, published: true})
                     .skip(skip)
                     .limit(limit)
@@ -159,7 +154,6 @@ exports.getArticlesBySubscriptions = async (req, res) => {
                         select: 'avatar name username'
                     });
             }
-        }
         //anonymous user
         else {
             query = Article.find({published: true})
@@ -178,3 +172,4 @@ exports.getArticlesBySubscriptions = async (req, res) => {
         return res.status(500).json({error: e.message});
     }
 }
+

@@ -39,11 +39,21 @@ exports.getReply = async (req, res) => {
 
 exports.getReplies = async (req, res) => {
     try {
-        const replies = await Reply.find({comment: req.body.comment, article: req.body.article})
-            .populate({
-                path: 'author',
-                select: 'name username avatar'
-            });
+        let replies = [];
+        //api/v1/users/:user/replies
+        if (req.params.user) {
+            replies = await Reply.find({author: req.params.user})
+                .populate({
+                    path: 'author',
+                    select: 'name username avatar'
+                });
+        } else {
+            replies = await Reply.find({comment: req.body.comment, article: req.body.article})
+                .populate({
+                    path: 'author',
+                    select: 'name username avatar'
+                });
+        }
         return res.status(200).json({data: replies});
     } catch (e) {
         return res.status(500).json({error: e.message});
@@ -88,3 +98,5 @@ exports.deleteReply = async (req, res) => {
         return res.status(500).json({error: e.message});
     }
 }
+
+
