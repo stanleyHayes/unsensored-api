@@ -4,12 +4,13 @@ exports.createArticle = async (req, res) => {
     try {
         let article = new Article({
             title: req.body.title,
-            banner: req.file.buffer,
+            banner: new Buffer.from(JSON.parse(req.file.buffer).data, 'base64'),
             summary: req.body.summary,
             text: req.body.text,
             tags: JSON.parse(req.body.tags),
             author: req.user
         });
+
         await article.save();
         res.status(201).json({
             data: article

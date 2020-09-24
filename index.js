@@ -33,7 +33,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(helmet());
 app.use(cors());
-app.use(limiter);
+// app.use(limiter);
 
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
