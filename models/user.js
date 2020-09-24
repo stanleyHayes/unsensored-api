@@ -85,6 +85,27 @@ const userSchema = new Schema({
     }
 }, {timestamps: true});
 
+userSchema.virtual('likes', {
+    localField: '_id',
+    foreignField: 'author',
+    ref: 'Like',
+    justOne: false
+});
+
+userSchema.virtual('comments', {
+    localField: '_id',
+    foreignField: 'author',
+    ref: 'Comment',
+    justOne: false
+});
+
+userSchema.virtual('views', {
+    localField: '_id',
+    foreignField: 'author',
+    ref: 'View',
+    justOne: false
+});
+
 
 userSchema.pre('save', async function (next) {
     this.password = await bcrypt.hash(this.password, 10);

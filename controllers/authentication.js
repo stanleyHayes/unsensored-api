@@ -40,6 +40,48 @@ exports.login = async (req, res) => {
 
 exports.loggedInUser = async (req, res) => {
     try {
+        const user = await User.findById(req.user._id)
+            // .populate({
+            //     path: 'views',
+            //     populate: {
+            //         path: 'article',
+            //         select: 'summary _id title'
+            //     }
+            // })
+            .populate({
+                path: 'comments',
+                populate: {
+                    path: 'comment',
+                    select: 'text article',
+                    populate: {
+                        path: 'article',
+                        select: '_id title'
+                    }
+                }
+            })
+            // .populate({
+            //     path: 'likes'
+            // });
+        // req.user.populate({
+        //     path: 'views',
+        //     populate: {
+        //         path: 'article',
+        //         select: 'summary _id title'
+        //     }
+        // }).populate({
+        //     path: 'comments',
+        //     populate: {
+        //         path: 'comment',
+        //         select: 'text article',
+        //         populate: {
+        //             path: 'article',
+        //             select: '_id title'
+        //         }
+        //     }
+        // }).populate({
+        //     path: 'likes'
+        // }).execPopulate();
+
         res.status(200).json({data: req.user, token: req.token})
     } catch (e) {
         res.status(500).json({error: e.message});
@@ -81,7 +123,7 @@ exports.resetPassword = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
     try {
 
-    }catch (e) {
+    } catch (e) {
 
     }
 }

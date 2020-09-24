@@ -3,6 +3,8 @@ const multer = require('multer');
 
 const {createArticle, deleteArticle, getArticle, getArticles, updateArticle, getArticlesBySubscriptions} = require("../controllers/articles");
 const {auth} = require("../middleware/auth");
+const likesRouter = require('../routes/likes');
+
 const router = express.Router({mergeParams: true});
 
 const article = multer({
@@ -20,6 +22,8 @@ const article = multer({
 articleError = (error, req, res, next) => {
     res.status(400).json({error: error.message});
 }
+
+router.use('/likes', likesRouter);
 
 router.post('/', auth, article.single('banner'), createArticle, articleError);
 router.get('/', auth, getArticles);
