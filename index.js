@@ -45,6 +45,8 @@ app.use('/api/v1/articles', require('./routes/articles'));
 app.use('/api/v1/comments', require('./routes/comments'));
 app.use('/api/v1/replies', require('./routes/replies'));
 app.use('/api/v1/users', require('./routes/users'));
+app.use('/api/v1/views', require('./routes/views'));
+
 
 app.listen(process.env.PORT || 8000, () => {
     console.log(`Server connected in ${process.env.NODE_ENV} on port ${process.env.PORT}`)

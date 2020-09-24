@@ -13,7 +13,7 @@ const viewSchema = new Schema({
         ref: 'Article',
         required: [true, 'article required']
     }
-}, {timestamps: true});
+}, {timestamps: true, toJSON: {virtuals: true}, toObject: {virtuals: true}});
 
 const View = mongoose.model('View', viewSchema);
 

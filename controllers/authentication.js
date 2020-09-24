@@ -40,14 +40,14 @@ exports.login = async (req, res) => {
 
 exports.loggedInUser = async (req, res) => {
     try {
-        const user = await User.findById(req.user._id)
-            // .populate({
-            //     path: 'views',
-            //     populate: {
-            //         path: 'article',
-            //         select: 'summary _id title'
-            //     }
-            // })
+        req.user
+            .populate({
+                path: 'views',
+                populate: {
+                    path: 'article',
+                    select: 'summary _id title'
+                }
+            })
             .populate({
                 path: 'comments',
                 populate: {
@@ -58,31 +58,13 @@ exports.loggedInUser = async (req, res) => {
                         select: '_id title'
                     }
                 }
-            })
-            // .populate({
-            //     path: 'likes'
-            // });
-        // req.user.populate({
-        //     path: 'views',
-        //     populate: {
-        //         path: 'article',
-        //         select: 'summary _id title'
-        //     }
-        // }).populate({
-        //     path: 'comments',
-        //     populate: {
-        //         path: 'comment',
-        //         select: 'text article',
-        //         populate: {
-        //             path: 'article',
-        //             select: '_id title'
-        //         }
-        //     }
-        // }).populate({
-        //     path: 'likes'
-        // }).execPopulate();
+            }).populate({
+            path: 'likes'
+        }).execPopulate();
 
-        res.status(200).json({data: req.user, token: req.token})
+        const user = await User.findById(req.user._id).populate('likes').populate('comments').populate('views');
+
+        res.status(200).json({data: req.user, token: req.token});
     } catch (e) {
         res.status(500).json({error: e.message});
     }

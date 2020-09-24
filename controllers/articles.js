@@ -21,7 +21,20 @@ exports.createArticle = async (req, res) => {
 
 exports.getArticle = async (req, res) => {
     try {
-        let article = await Article.findById(req.params.id);
+        let article = await Article.findById(req.params.id)
+            .populate({
+                path: 'author',
+                select: 'avatar name username'
+            })
+            .populate({
+                path: 'comments'
+            })
+            .populate({
+                path: 'likes'
+            })
+            .populate({
+                path: 'views'
+            });
         if (!article) {
             return res.status(404).json({error: 'Article not found'});
         }
@@ -39,24 +52,15 @@ exports.getArticles = async (req, res) => {
         let skip = (page - 1) * limit;
         let sort = {};
         let match = {};
+        console.log(req.query);
+
         if (req.query.sort) {
             let parts = req.query.sort.split(':');
             sort['datePublished'] = parts[1] === 'asc' ? 1 : -1;
         }
-        let tags;
-
-        //logged in user
-        tags = req.user.subscriptions;
-        if (tags.length > 0) {
-            query = Article.find({tags: {$all: tags}, published: true})
-                .skip(skip)
-                .limit(limit)
-                .sort(sort)
-                .populate({
-                    path: 'author',
-                    select: 'avatar name username'
-                });
-        } else if (req.params.user) {
+        //api/v1/users/:user/articles
+        //get articles authored by user
+        if (req.params.user) {
             query = Article.find({author: req.params.user})
                 .skip(skip)
                 .limit(limit)
@@ -64,16 +68,34 @@ exports.getArticles = async (req, res) => {
                 .populate({
                     path: 'author',
                     select: 'avatar name username'
+                })
+                .populate({
+                    path: 'commentCount'
+                })
+                .populate({
+                    path: 'likeCount'
+                })
+                .populate({
+                    path: 'viewCount'
                 });
         } else {
-
-            query = Article.find({published: true})
+            //api/v1/articles?tags=&sortBy=field:value&published=value&
+            query = Article.find(match)
                 .skip(skip)
                 .limit(limit)
                 .sort(sort)
                 .populate({
                     path: 'author',
                     select: 'avatar name username'
+                })
+                .populate({
+                    path: 'commentCount'
+                })
+                .populate({
+                    path: 'likeCount'
+                })
+                .populate({
+                    path: 'viewCount'
                 });
         }
 
@@ -119,57 +141,3 @@ exports.deleteArticle = async (req, res) => {
         return res.status(500).json({error: e.message});
     }
 }
-
-exports.getArticlesBySubscriptions = async (req, res) => {
-    try {
-        let query;
-        let page = req.query.page || 1;
-        let limit = parseInt(req.query.limit) || 20;
-        let skip = (page - 1) * limit;
-        let sort = {};
-        let match = {};
-        if (req.query.sort) {
-            let parts = req.query.sort.split(':');
-            sort['datePublished'] = parts[1] === 'asc' ? 1 : -1;
-        }
-        let tags;
-
-            tags = req.user.subscriptions;
-            if (tags.length === 0) {
-                query = Article.find({published: true})
-                    .skip(skip)
-                    .limit(limit)
-                    .sort(sort)
-                    .populate({
-                        path: 'author',
-                        select: 'avatar name username'
-                    });
-            } else if(tags > 0) {
-                query = Article.find({tags: {$all: tags}, published: true})
-                    .skip(skip)
-                    .limit(limit)
-                    .sort(sort)
-                    .populate({
-                        path: 'author',
-                        select: 'avatar name username'
-                    });
-            }
-        //anonymous user
-        else {
-            query = Article.find({published: true})
-                .skip(skip)
-                .limit(limit)
-                .sort(sort)
-                .populate({
-                    path: 'author',
-                    select: 'avatar name username'
-                });
-        }
-
-        const articles = await query;
-        return res.status(200).json({data: articles});
-    } catch (e) {
-        return res.status(500).json({error: e.message});
-    }
-}
-

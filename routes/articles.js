@@ -1,7 +1,7 @@
 const express = require("express");
 const multer = require('multer');
 
-const {createArticle, deleteArticle, getArticle, getArticles, updateArticle, getArticlesBySubscriptions} = require("../controllers/articles");
+const {createArticle, deleteArticle, getArticle, getArticles, updateArticle} = require("../controllers/articles");
 const {auth} = require("../middleware/auth");
 const likesRouter = require('../routes/likes');
 
@@ -27,7 +27,6 @@ router.use('/likes', likesRouter);
 
 router.post('/', auth, article.single('banner'), createArticle, articleError);
 router.get('/', auth, getArticles);
-router.get('/timeline', getArticlesBySubscriptions);
 router.delete('/:id', auth, deleteArticle);
 router.patch('/:id', auth, updateArticle);
 router.get('/:id', getArticle);

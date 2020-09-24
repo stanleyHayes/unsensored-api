@@ -83,7 +83,7 @@ const userSchema = new Schema({
             }
         ]
     }
-}, {timestamps: true});
+}, {timestamps: true, toJSON: {virtuals: true}, toObject: {virtuals: true}});
 
 userSchema.virtual('likes', {
     localField: '_id',

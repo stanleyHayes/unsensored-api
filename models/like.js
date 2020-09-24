@@ -20,7 +20,7 @@ const likeSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Comment'
     }
-}, {timestamps: true});
+}, {timestamps: true, toJSON: {virtuals: true}, toObject: {virtuals: true}});
 
 const Like = mongoose.model('Like', likeSchema);
 

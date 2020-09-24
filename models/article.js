@@ -7,17 +7,14 @@ const Schema = mongoose.Schema;
 const articleSchema = new Schema({
     title: {
         type: String,
-        required: [true, 'title required'],
         trim: true
     },
     summary: {
         type: String,
-        required: [true, 'summary required'],
         trim: true
     },
     text: {
         type: String,
-        required: [true, 'text required'],
         trim: true
     },
     author: {
@@ -37,21 +34,54 @@ const articleSchema = new Schema({
     },
     datePublished: {
         type: Date
-    },
-    likes: {
-        type: [Schema.Types.ObjectId],
-        ref: 'User'
-    },
-    views: {
-        type: [Schema.Types.ObjectId],
-        ref: 'View'
-    },
-    comments: {
-        type: [Schema.Types.ObjectId],
-        ref: 'Comment'
-    },
+    }
+}, {timestamps: true, toJSON: {virtuals: true}, toObject: {virtuals: true}});
 
-}, {timestamps: true});
+
+articleSchema.virtual('likes', {
+    localField: '_id',
+    foreignField: 'article',
+    justOne: false,
+    ref: 'Like'
+});
+
+articleSchema.virtual('comments', {
+    localField: '_id',
+    foreignField: 'article',
+    justOne: false,
+    ref: 'Comment'
+});
+
+articleSchema.virtual('views', {
+    localField: '_id',
+    foreignField: 'article',
+    justOne: false,
+    ref: 'View'
+});
+
+articleSchema.virtual('likeCount', {
+    localField: '_id',
+    foreignField: 'article',
+    justOne: false,
+    ref: 'Like',
+    count: true
+});
+
+articleSchema.virtual('commentCount', {
+    localField: '_id',
+    foreignField: 'article',
+    justOne: false,
+    ref: 'Comment',
+    count: true
+});
+
+articleSchema.virtual('viewCount', {
+    localField: '_id',
+    foreignField: 'article',
+    justOne: false,
+    ref: 'View',
+    count: true
+});
 
 articleSchema.pre('remove', async function (next) {
     await Comment.deleteMany({article: this._id});

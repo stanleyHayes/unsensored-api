@@ -26,7 +26,7 @@ const commentSchema = new Schema({
         required: [true, 'article required'],
         ref: 'Article'
     }
-}, {timestamps: true});
+}, {timestamps: true, toJSON: {virtuals: true}, toObject: {virtuals: true}});
 
 commentSchema.pre('remove', async function (next) {
     await Reply.deleteMany({comment: this._id});
