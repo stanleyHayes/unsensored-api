@@ -1,10 +1,12 @@
 const Article = require('../models/article');
+const DatauriParser = require('datauri/parser');
+const parser = new DatauriParser();
 
 exports.createArticle = async (req, res) => {
     try {
         let article = new Article({
             title: req.body.title,
-            banner: req.file.buffer,
+            banner: parser.format('.png', req.file.buffer).content,
             summary: req.body.summary,
             text: req.body.text,
             tags: JSON.parse(req.body.tags),

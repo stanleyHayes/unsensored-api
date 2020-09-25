@@ -23,7 +23,7 @@ const articleSchema = new Schema({
         required: [true, 'author required']
     },
     banner: {
-        type: Buffer
+        type: String
     },
     tags: {
         type: [String]
