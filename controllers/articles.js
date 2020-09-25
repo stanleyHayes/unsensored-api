@@ -35,6 +35,15 @@ exports.getArticle = async (req, res) => {
             })
             .populate({
                 path: 'views'
+            })
+            .populate({
+                path: 'commentCount'
+            })
+            .populate({
+                path: 'likeCount'
+            })
+            .populate({
+                path: 'viewCount'
             });
         if (!article) {
             return res.status(404).json({error: 'Article not found'});
@@ -55,52 +64,43 @@ exports.getArticles = async (req, res) => {
         let match = {};
         console.log(req.query);
 
-        if (req.query.sort) {
+        if (req.query.sortBy) {
             let parts = req.query.sort.split(':');
             sort['datePublished'] = parts[1] === 'asc' ? 1 : -1;
         }
-        //api/v1/users/:user/articles
-        //get articles authored by user
-        if (req.params.user) {
-            query = Article.find({author: req.params.user})
-                .skip(skip)
-                .limit(limit)
-                .sort(sort)
-                .populate({
-                    path: 'author',
-                    select: 'avatar name username'
-                })
-                .populate({
-                    path: 'commentCount'
-                })
-                .populate({
-                    path: 'likeCount'
-                })
-                .populate({
-                    path: 'viewCount'
-                });
-        } else {
-            //api/v1/articles?tags=&sortBy=field:value&published=value&
-            query = Article.find(match)
-                .skip(skip)
-                .limit(limit)
-                .sort(sort)
-                .populate({
-                    path: 'author',
-                    select: 'avatar name username'
-                })
-                .populate({
-                    path: 'commentCount'
-                })
-                .populate({
-                    path: 'likeCount'
-                })
-                .populate({
-                    path: 'viewCount'
-                });
+
+        if (req.query.published) {
+            match.published = Boolean(req.query.published);
         }
 
+        //api/v1/articles?tags=&sortBy=field:value&published=value&
+        query = Article.find({author: req.user._id, ...match});
+
+        if (req.query.tags) {
+            const tags = req.query.tags.split(',');
+            query = Article.find({author: req.user._id, ...match, $all: {tags: [tags]}});
+        }
+
+        query = query
+            .skip(skip)
+            .limit(limit)
+            .sort(sort)
+            .populate({
+                path: 'author',
+                select: 'avatar name username'
+            })
+            .populate({
+                path: 'commentCount'
+            })
+            .populate({
+                path: 'likeCount'
+            })
+            .populate({
+                path: 'viewCount'
+            });
+
         const articles = await query;
+
         return res.status(200).json({data: articles});
     } catch (e) {
         return res.status(500).json({error: e.message});
@@ -138,6 +138,58 @@ exports.deleteArticle = async (req, res) => {
         }
         await article.remove();
         res.status(200).json({data: article});
+    } catch (e) {
+        return res.status(500).json({error: e.message});
+    }
+}
+
+exports.getAuthoredArticles = async (req, res) => {
+    try {
+        let query;
+        let page = req.query.page || 1;
+        let limit = parseInt(req.query.limit) || 20;
+        let skip = (page - 1) * limit;
+        let sort = {};
+        let match = {};
+        console.log(req.query);
+
+        if (req.query.sort) {
+            let parts = req.query.sort.split(':');
+            sort['datePublished'] = parts[1] === 'asc' ? 1 : -1;
+        }
+
+        if (req.query.published) {
+            match.published = Boolean(req.query.published);
+        }
+
+        //api/v1/articles?tags=&sortBy=field:value&published=value&
+        query = Article.find({author: req.user._id, ...match});
+
+        if (req.query.tags) {
+            const tags = req.query.tags.split(',');
+            query = Article.find({author: req.user._id, ...match, $all: {tags: [tags]}});
+        }
+
+        query = query
+            .skip(skip)
+            .limit(limit)
+            .sort(sort)
+            .populate({
+                path: 'author',
+                select: 'avatar name username'
+            })
+            .populate({
+                path: 'commentCount'
+            })
+            .populate({
+                path: 'likeCount'
+            })
+            .populate({
+                path: 'viewCount'
+            });
+
+        const articles = await query;
+        return res.status(200).json({data: articles});
     } catch (e) {
         return res.status(500).json({error: e.message});
     }

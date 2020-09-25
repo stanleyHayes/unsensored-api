@@ -34,6 +34,9 @@ const articleSchema = new Schema({
     },
     datePublished: {
         type: Date
+    },
+    link: {
+        type: String
     }
 }, {timestamps: true, toJSON: {virtuals: true}, toObject: {virtuals: true}});
 
@@ -81,6 +84,11 @@ articleSchema.virtual('viewCount', {
     justOne: false,
     ref: 'View',
     count: true
+});
+
+articleSchema.pre('save', async function (next) {
+    this.link = `https://uncensored.vercel.app/articles/${this._id}`;
+    next();
 });
 
 articleSchema.pre('remove', async function (next) {
