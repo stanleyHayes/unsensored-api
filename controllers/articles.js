@@ -4,7 +4,7 @@ exports.createArticle = async (req, res) => {
     try {
         let article = new Article({
             title: req.body.title,
-            banner: new Buffer.from(JSON.parse(req.file.buffer).data, 'base64'),
+            banner: req.file.buffer,
             summary: req.body.summary,
             text: req.body.text,
             tags: JSON.parse(req.body.tags),
@@ -50,6 +50,7 @@ exports.getArticle = async (req, res) => {
         }
         return res.status(200).json({data: article});
     } catch (e) {
+        console.log(e.message);
         return res.status(500).json({error: e.message});
     }
 }
