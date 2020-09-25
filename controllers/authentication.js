@@ -1,4 +1,6 @@
 const User = require("../models/user");
+const DatauriParser = require('datauri/parser');
+const parser = new DatauriParser();
 
 exports.register = async (req, res) => {
     try {
@@ -107,5 +109,56 @@ exports.forgotPassword = async (req, res) => {
 
     } catch (e) {
 
+    }
+}
+
+exports.changePassword = async (req, res) => {
+    try {
+
+    } catch (e) {
+
+    }
+}
+
+exports.updateProfile = async (req, res) => {
+    try {
+        const updates = Object.keys(req.body);
+        const allowedUpdates = ['username', "name", 'email'];
+        const isAllowed = updates.every(update => allowedUpdates.includes(update));
+        if (!isAllowed) {
+            return res.status(400).json({error: 'action not allowed'});
+        }
+        for (let key of updates) {
+            req.user[key] = req.body[key];
+        }
+        if (req.file.buffer) {
+            req.user.avatar = parser.format('.png', req.file.buffer).content;
+        }
+        await req.user.save();
+
+        req.user.populate({
+            path: 'views',
+            populate: {
+                path: 'article',
+                select: 'summary _id title'
+            }
+        })
+            .populate({
+                path: 'comments',
+                populate: {
+                    path: 'comment',
+                    select: 'text article',
+                    populate: {
+                        path: 'article',
+                        select: '_id title'
+                    }
+                }
+            }).populate({
+            path: 'likes'
+        }).execPopulate();
+
+        res.status(200).json({data: req.user});
+    } catch (e) {
+        res.status(500).json({error: e.message});
     }
 }

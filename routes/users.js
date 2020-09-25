@@ -5,7 +5,7 @@ const {createUser, deleteUser, getUser, getUsers, updateUser} = require('../cont
 
 router.post('/', auth, authorize('ADMIN', 'SUPER_ADMIN'), createUser);
 router.patch('/:username', auth, authorize('ADMIN', 'SUPER_ADMIN'), updateUser);
-router.get('/:id', auth, authorize('ADMIN', 'SUPER_ADMIN'), getUser);
+router.get('/:id', auth, getUser);
 router.delete('/:', auth, authorize('ADMIN', 'SUPER_ADMIN'), deleteUser);
 router.get('/', auth, authorize('ADMIN', 'SUPER_ADMIN'), getUsers);
 

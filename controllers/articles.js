@@ -79,7 +79,7 @@ exports.getArticles = async (req, res) => {
 
         if (req.query.tags) {
             const tags = req.query.tags.split(',');
-            query = Article.find({author: req.user._id, ...match, $all: {tags: [tags]}});
+            query = Article.find({...match, $all: {tags: [tags]}});
         }
 
         query = query
