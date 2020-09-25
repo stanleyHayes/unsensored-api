@@ -50,7 +50,6 @@ exports.getArticle = async (req, res) => {
         }
         return res.status(200).json({data: article});
     } catch (e) {
-        console.log(e.message);
         return res.status(500).json({error: e.message});
     }
 }
@@ -100,7 +99,6 @@ exports.getArticles = async (req, res) => {
             });
 
         const articles = await query;
-
         return res.status(200).json({data: articles});
     } catch (e) {
         return res.status(500).json({error: e.message});
