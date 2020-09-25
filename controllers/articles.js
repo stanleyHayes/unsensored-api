@@ -63,7 +63,6 @@ exports.getArticles = async (req, res) => {
         let skip = (page - 1) * limit;
         let sort = {};
         let match = {};
-        console.log(req.query);
 
         if (req.query.sortBy) {
             let parts = req.query.sort.split(':');
@@ -152,7 +151,6 @@ exports.getAuthoredArticles = async (req, res) => {
         let skip = (page - 1) * limit;
         let sort = {};
         let match = {};
-        console.log(req.query);
 
         if (req.query.sort) {
             let parts = req.query.sort.split(':');
