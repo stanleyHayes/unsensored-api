@@ -13,7 +13,7 @@ exports.createComment = async (req, res) => {
             .populate({
                 path: 'author',
                 select: 'name username avatar'
-            });
+            }).populate('replyCount').populate('likeCount');
         return res.status(201).json({data: comment});
     } catch (e) {
         return res.status(500).json({error: e.message});
@@ -26,7 +26,7 @@ exports.getComment = async (req, res) => {
             .populate({
                 path: 'author',
                 select: 'name username avatar'
-            });
+            }).populate('replyCount').populate('likeCount').populate('replies').populate('likes');
         if (!comment) {
             return res.status(400).json({error: 'comment not found'});
         }
