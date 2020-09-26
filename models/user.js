@@ -106,6 +106,12 @@ userSchema.virtual('views', {
     justOne: false
 });
 
+userSchema.virtual('articles', {
+    localField: '_id',
+    foreignField: 'author',
+    ref: 'Article',
+    justOne: false
+});
 
 userSchema.pre('save', async function (next) {
     this.password = await bcrypt.hash(this.password, 10);

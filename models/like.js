@@ -22,6 +22,7 @@ const likeSchema = new Schema({
     }
 }, {timestamps: true, toJSON: {virtuals: true}, toObject: {virtuals: true}});
 
+
 const Like = mongoose.model('Like', likeSchema);
 
 module.exports = Like;

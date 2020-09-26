@@ -17,16 +17,19 @@ const commentSchema = new Schema({
     datePublished: {
         type: Date
     },
-    likes: {
-        type: [Schema.Types.ObjectId],
-        ref: 'User'
-    },
     article: {
         type: Schema.Types.ObjectId,
         required: [true, 'article required'],
         ref: 'Article'
     }
 }, {timestamps: true, toJSON: {virtuals: true}, toObject: {virtuals: true}});
+
+commentSchema.virtual('likes', {
+    justOne: false,
+    ref: 'Like',
+    localField:'_id',
+    foreignField: 'comment'
+});
 
 commentSchema.pre('remove', async function (next) {
     await Reply.deleteMany({comment: this._id});
