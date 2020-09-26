@@ -16,10 +16,6 @@ const replySchema = new Schema({
     datePublished: {
         type: Date
     },
-    likes: {
-        type: [Schema.Types.ObjectId],
-        ref: 'User'
-    },
     article: {
         type: Schema.Types.ObjectId,
         ref: 'Article'
@@ -29,6 +25,22 @@ const replySchema = new Schema({
         ref: 'Comment'
 }
 }, {timestamps: true, toJSON: {virtuals: true}, toObject: {virtuals: true}});
+
+replySchema.virtual('likeCount', {
+    justOne: false,
+    ref: 'Like',
+    foreignField: 'reply',
+    localField: '_id',
+    count: true
+});
+
+
+replySchema.virtual('likes', {
+    justOne: false,
+    ref: 'Like',
+    foreignField: 'reply',
+    localField: '_id'
+});
 
 const Reply = mongoose.model('Reply', replySchema);
 

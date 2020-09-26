@@ -44,16 +44,20 @@ exports.getComments = async (req, res) => {
             comments = await Comment({author: req.params.user})
                 .populate({
                     path: 'author',
-                    select: 'name username avatar'
-                });
-        } else {
-            comments = await Comment.find({article: req.body.article})
+                    select: 'name username avatar _id'
+                }).populate('likeCount').populate('replyCount');
+            return res.status(200).json({data: comments});
+        }
+        //api/v1/articles/:article/comments
+        if(req.params.article){
+            comments = await Comment.find({article: req.params.article})
                 .populate({
                     path: 'author',
-                    select: 'name username avatar'
-                });
+                    select: 'name username avatar _id'
+                }).populate('likeCount').populate('replyCount');
+            return res.status(200).json({data: comments});
         }
-        return res.status(200).json({data: comments});
+        return res.status(200).json({data: []});
     } catch (e) {
         return res.status(500).json({error: e.message});
     }

@@ -10,11 +10,12 @@ exports.createReply = async (req, res) => {
         });
 
         await reply.save();
-        reply = await Reply.findById(reply._id)
-            .populate({
-                path: 'author',
-                select: 'name username avatar'
-            });
+
+        reply = await Reply.findById(reply._id).populate({
+            path: 'author',
+            select: '_id name username avatar'
+        }).populate('likeCount');
+
         return res.status(201).json({data: reply});
     } catch (e) {
         return res.status(500).json({error: e.message});
@@ -27,7 +28,7 @@ exports.getReply = async (req, res) => {
             .populate({
                 path: 'author',
                 select: 'name username avatar'
-            });
+            }).populate('likeCount');
         if (!reply) {
             return res.status(400).json({error: 'comment not found'});
         }
@@ -46,15 +47,21 @@ exports.getReplies = async (req, res) => {
                 .populate({
                     path: 'author',
                     select: 'name username avatar'
-                });
-        } else {
-            replies = await Reply.find({comment: req.body.comment, article: req.body.article})
+                }).populate('likeCount');
+            return res.status(200).json({data: replies});
+        }
+
+        if(req.params.comment)
+        {
+            replies = await Reply.find({comment: req.params.comment})
                 .populate({
                     path: 'author',
                     select: 'name username avatar'
-                });
+                }).populate('likeCount');
+
+            return res.status(200).json({data: replies});
         }
-        return res.status(200).json({data: replies});
+        return res.status(200).json({data: []});
     } catch (e) {
         return res.status(500).json({error: e.message});
     }
