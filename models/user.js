@@ -106,6 +106,21 @@ userSchema.virtual('views', {
     justOne: false
 });
 
+
+userSchema.virtual('replies', {
+    localField: '_id',
+    foreignField: 'author',
+    ref: 'Reply',
+    justOne: false
+});
+
+userSchema.virtual('articles', {
+    localField: '_id',
+    foreignField: 'author',
+    ref: 'Article',
+    justOne: false
+});
+
 userSchema.virtual('articles', {
     localField: '_id',
     foreignField: 'author',
