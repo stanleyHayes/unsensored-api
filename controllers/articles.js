@@ -75,7 +75,7 @@ exports.getArticles = async (req, res) => {
         }
 
         //api/v1/articles?tags=&sortBy=field:value&published=value&
-        query = Article.find({author: req.user._id, ...match});
+        query = Article.find({...match});
 
         if (req.query.tags) {
             const tags = req.query.tags.split(',');
