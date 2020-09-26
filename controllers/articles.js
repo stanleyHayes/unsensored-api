@@ -65,7 +65,7 @@ exports.getArticles = async (req, res) => {
         let limit = parseInt(req.query.limit) || 20;
         let skip = (page - 1) * limit;
         let sort = {
-            dateCreated: -1
+            updatedAt: -1
         };
         let match = {};
 
@@ -154,7 +154,7 @@ exports.getAuthoredArticles = async (req, res) => {
         let limit = parseInt(req.query.limit) || 20;
         let skip = (page - 1) * limit;
         let sort = {
-            dateCreated: -1
+            updatedAt: -1
         };
         let match = {};
 
