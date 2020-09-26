@@ -23,6 +23,6 @@ updateProfileError = (error, req, res, next) => {
 router.post('/register', register);
 router.post('/login', login);
 router.get('/me', auth,  loggedInUser);
-router.patch('/', avatar.single('avatar'), updateProfile, updateProfileError);
+router.patch('/me', auth, avatar.single('avatar'), updateProfile, updateProfileError);
 
 module.exports = router;
