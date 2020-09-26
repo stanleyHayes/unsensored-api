@@ -21,9 +21,9 @@ const replySchema = new Schema({
         ref: 'Article'
     },
     comment: {
-    type: Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'Comment'
-}
+    }
 }, {timestamps: true, toJSON: {virtuals: true}, toObject: {virtuals: true}});
 
 replySchema.virtual('likeCount', {

@@ -113,7 +113,7 @@ exports.getArticles = async (req, res) => {
 
 exports.updateArticle = async (req, res) => {
     try {
-        let article = await Article.findOne({_id: req.params.id});
+        let article = await Article.findOne({_id: req.params.id, author: req.user._id});
         if (!article) {
             return res.status(404).json({error: 'Article not found'});
         }

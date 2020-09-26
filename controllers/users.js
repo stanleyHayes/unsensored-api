@@ -25,7 +25,7 @@ exports.getUsers = async (req, res) => {
             .populate('comments')
             .populate('replies')
             .populate('articles');
-        res.status(201).json({data: users});
+        res.status(200).json({data: users});
     } catch (e) {
         res.status(500).json({error: e.message});
     }
