@@ -10,7 +10,9 @@ exports.createArticle = async (req, res) => {
             summary: req.body.summary,
             text: req.body.text,
             tags: JSON.parse(req.body.tags),
-            author: req.user
+            author: req.user,
+            datePublished: req.body.datePublished,
+            published: req.body.published
         });
 
         await article.save();
@@ -62,7 +64,9 @@ exports.getArticles = async (req, res) => {
         let page = req.query.page || 1;
         let limit = parseInt(req.query.limit) || 20;
         let skip = (page - 1) * limit;
-        let sort = {};
+        let sort = {
+            dateCreated: -1
+        };
         let match = {};
 
         if (req.query.sortBy) {
@@ -149,7 +153,9 @@ exports.getAuthoredArticles = async (req, res) => {
         let page = req.query.page || 1;
         let limit = parseInt(req.query.limit) || 20;
         let skip = (page - 1) * limit;
-        let sort = {};
+        let sort = {
+            dateCreated: -1
+        };
         let match = {};
 
         if (req.query.sort) {

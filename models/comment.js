@@ -14,13 +14,13 @@ const commentSchema = new Schema({
         ref: 'User',
         required: [true, 'author required']
     },
-    datePublished: {
-        type: Date
-    },
     article: {
         type: Schema.Types.ObjectId,
         required: [true, 'article required'],
         ref: 'Article'
+    },
+    link: {
+        type: String
     }
 }, {timestamps: true, toJSON: {virtuals: true}, toObject: {virtuals: true}});
 
@@ -29,6 +29,29 @@ commentSchema.virtual('likes', {
     ref: 'Like',
     localField:'_id',
     foreignField: 'comment'
+});
+
+commentSchema.virtual('likeCount', {
+    justOne: false,
+    ref: 'Like',
+    localField:'_id',
+    foreignField: 'comment',
+    count: true
+});
+
+commentSchema.virtual('replies', {
+    justOne: false,
+    ref: 'Reply',
+    localField:'_id',
+    foreignField: 'comment'
+});
+
+commentSchema.virtual('replyCount', {
+    justOne: false,
+    ref: 'Reply',
+    localField:'_id',
+    foreignField: 'comment',
+    count: true
 });
 
 commentSchema.pre('remove', async function (next) {
