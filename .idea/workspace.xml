@@ -21,8 +21,12 @@
   <component name="ChangeListManager">
     <list default="true" id="63b25d58-f4fc-409f-a282-fd6c1376fa2d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/controllers/articles.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/articles.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/likes.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/likes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/controllers/views.js" beforeDir="false" afterPath="$PROJECT_DIR$/controllers/views.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/like.js" beforeDir="false" afterPath="$PROJECT_DIR$/models/like.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/articles.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/articles.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/users.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/users.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/views.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/views.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,7 +98,7 @@
       <workItem from="1601193029408" duration="688000" />
       <workItem from="1601195851030" duration="2269000" />
       <workItem from="1601215862184" duration="50000" />
-      <workItem from="1601245225225" duration="814000" />
+      <workItem from="1601245225225" duration="2988000" />
     </task>
     <servers />
   </component>

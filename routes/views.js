@@ -5,6 +5,6 @@ const {createView, getViews} = require('../controllers/views');
 const router = express.Router({mergeParams: true});
 
 router.post('/', auth, createView);
-router.post('/', auth, getViews);
+router.get('/', auth, getViews);
 
 module.exports = router;

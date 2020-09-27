@@ -3,8 +3,10 @@ const router = express.Router({mergeParams: true});
 const {auth, authorize} = require('../middleware/auth');
 const {createUser, deleteUser, getUser, getUsers, updateUser} = require('../controllers/users');
 
-const commentsRouter = require('../routes/comments');
-router.use('/:user/comments', commentsRouter);
+router.use('/:user/comments', require('../routes/comments'));
+router.use('/:user/articles', require('../routes/articles'));
+router.use('/:user/likes', require('../routes/likes'));
+router.use('/:user/views', require('../routes/views'));
 
 router.post('/', auth, authorize('ADMIN', 'SUPER_ADMIN'), createUser);
 router.patch('/me', auth, authorize('ADMIN', 'SUPER_ADMIN'), updateUser);

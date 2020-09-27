@@ -19,6 +19,11 @@ const likeSchema = new Schema({
     comment: {
         type: Schema.Types.ObjectId,
         ref: 'Comment'
+    },
+    type: {
+        type: String,
+        enum: ['COMMENT', 'ARTICLE', 'REPLY'],
+        required: [true, 'like type required']
     }
 }, {timestamps: true, toJSON: {virtuals: true}, toObject: {virtuals: true}});
 
