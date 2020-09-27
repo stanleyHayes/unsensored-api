@@ -127,6 +127,9 @@ exports.updateArticle = async (req, res) => {
         for (let key of updates) {
             article[key] = req.body[key];
         }
+        if(req.file.buffer){
+            article["banner"] = parser.format(".png", req.file.buffer).content;
+        }
         await article.save();
         return res.status(200).json({data: article});
     } catch (e) {
