@@ -25,9 +25,9 @@ const articleSchema = new Schema({
     banner: {
         type: String
     },
-    tags: {
+    tags: [{
         type: [String]
-    },
+    }],
     published: {
         type: Boolean,
         default: false

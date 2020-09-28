@@ -114,6 +114,7 @@ exports.getArticles = async (req, res) => {
 exports.updateArticle = async (req, res) => {
     try {
         let article = await Article.findOne({_id: req.params.id, author: req.user._id});
+
         if (!article) {
             return res.status(404).json({error: 'Article not found'});
         }
@@ -125,14 +126,42 @@ exports.updateArticle = async (req, res) => {
         }
 
         for (let key of updates) {
+            if (key === 'tags') {
+                article['tags'] = req.body.tags.split(',');
+                continue;
+            }
             article[key] = req.body[key];
         }
-        if(req.file.buffer){
+        if (req.file && req.file.buffer) {
             article["banner"] = parser.format(".png", req.file.buffer).content;
         }
         await article.save();
+        article = await Article.findById(req.params.id)
+            .populate({
+                path: 'author',
+                select: 'avatar name username'
+            })
+            .populate({
+                path: 'comments'
+            })
+            .populate({
+                path: 'likes'
+            })
+            .populate({
+                path: 'views'
+            })
+            .populate({
+                path: 'commentCount'
+            })
+            .populate({
+                path: 'likeCount'
+            })
+            .populate({
+                path: 'viewCount'
+            });
         return res.status(200).json({data: article});
     } catch (e) {
+        console.log(e.message)
         return res.status(500).json({error: e.message});
     }
 }
