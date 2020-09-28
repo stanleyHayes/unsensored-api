@@ -16,6 +16,7 @@ exports.toggleLike = async (req, res) => {
                     }
                 ]
             });
+
         const {comment, reply, article, type} = req.body;
         if (!like) {
             switch (type) {
@@ -31,6 +32,7 @@ exports.toggleLike = async (req, res) => {
             }
             await like.save();
         } else {
+            console.log('removing like')
             await like.remove();
         }
         res.status(200).json({data: like});
@@ -49,14 +51,25 @@ exports.getLikesByCategory = async (req, res) => {
         let likes = [];
         if (req.params.article) {
             likes = await Like.find({article: req.params.article})
-                .populate({path: 'article', populate: {path: 'author', select: '_id name username'}});
+                .populate({path: 'author', select: 'name _id username avatar'});
         } else if (req.params.comment) {
             likes = await Like.find({comment: req.params.comment})
-                .populate({path: 'comment', populate: {path: 'author', select: '_id name username'}});
+                .populate({path: 'author', select: '_id name username'});
         } else if (req.params.reply) {
             likes = await Like.find({reply: req.params.reply})
-                .populate({path: 'reply', populate: {path: 'author', select: '_id name username'}});
+                .populate({path: 'author', select: '_id name username'});
+        }else if(req.params.user){
+            likes = await Like.find({author: req.params.user}).populate('comment').populate('article').populate('like');
         }
+        res.status(200).json({data: likes});
+    } catch (e) {
+        res.status(500).json({error: e.message});
+    }
+}
+
+exports.getLikesByLoggedInUser = async (req, res) => {
+    try {
+        const likes = await Like.find({author: req.user._id});
         res.status(200).json({data: likes});
     } catch (e) {
         res.status(500).json({error: e.message});
