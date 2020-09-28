@@ -122,25 +122,20 @@ exports.changePassword = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
     try {
-        let user = {
-            name: req.body.name,
-            username: req.body.username,
-            email: req.body.email
-        };
-
-        const updates = Object.keys(user);
+        const updates = Object.keys(req.body);
         const allowedUpdates = ['username', "name", 'email'];
         const isAllowed = updates.every(update => allowedUpdates.includes(update));
         if (!isAllowed) {
             return res.status(400).json({error: 'action not allowed'});
         }
         for (let key of updates) {
-            req.user[key] = user[key];
+            req.user[key] = req.body[key];
         }
         if (req.file.buffer) {
             req.user['avatar'] = parser.format('.png', req.file.buffer).content;
         }
-        await req.user.save({runValidators: true});
+        console.log(req.user.name, req.user.email, req.user.username)
+        await req.user.save();
 
         req.user.populate({
             path: 'views',
@@ -163,7 +158,7 @@ exports.updateProfile = async (req, res) => {
             path: 'likes'
         }).execPopulate();
 
-        user = await User.findById(req.user._id).populate('likes').populate('comments').populate('views');
+        await User.findById(req.user._id).populate('likes').populate('comments').populate('views');
 
         res.status(200).json({data: req.user});
     } catch (e) {
