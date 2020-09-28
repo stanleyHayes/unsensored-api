@@ -92,6 +92,14 @@ userSchema.virtual('likes', {
     justOne: false
 });
 
+userSchema.virtual('likeCount', {
+    localField: '_id',
+    foreignField: 'author',
+    ref: 'Like',
+    justOne: false,
+    count: true
+});
+
 userSchema.virtual('comments', {
     localField: '_id',
     foreignField: 'author',
@@ -99,11 +107,27 @@ userSchema.virtual('comments', {
     justOne: false
 });
 
+userSchema.virtual('commentCount', {
+    localField: '_id',
+    foreignField: 'author',
+    ref: 'Comment',
+    justOne: false,
+    count: true
+});
+
 userSchema.virtual('views', {
     localField: '_id',
     foreignField: 'author',
     ref: 'View',
     justOne: false
+});
+
+userSchema.virtual('viewCount', {
+    localField: '_id',
+    foreignField: 'author',
+    ref: 'View',
+    justOne: false,
+    count: true
 });
 
 
@@ -114,11 +138,12 @@ userSchema.virtual('replies', {
     justOne: false
 });
 
-userSchema.virtual('articles', {
+userSchema.virtual('replyCount', {
     localField: '_id',
     foreignField: 'author',
-    ref: 'Article',
-    justOne: false
+    ref: 'Reply',
+    justOne: false,
+    count: true
 });
 
 userSchema.virtual('articles', {
@@ -126,6 +151,14 @@ userSchema.virtual('articles', {
     foreignField: 'author',
     ref: 'Article',
     justOne: false
+});
+
+userSchema.virtual('articleCount', {
+    localField: '_id',
+    foreignField: 'author',
+    ref: 'Article',
+    justOne: false,
+    count: true
 });
 
 userSchema.pre('save', async function (next) {

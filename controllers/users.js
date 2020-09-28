@@ -24,7 +24,13 @@ exports.getUsers = async (req, res) => {
             .populate('likes')
             .populate('comments')
             .populate('replies')
-            .populate('articles');
+            .populate('articles')
+            .populate('articleCount')
+            .populate('commentCount')
+            .populate('replyCount')
+            .populate('viewCount')
+            .populate('likeCount');
+
         res.status(200).json({data: users});
     } catch (e) {
         res.status(500).json({error: e.message});
@@ -38,7 +44,12 @@ exports.getUser = async (req, res) => {
             .populate('likes')
             .populate('comments')
             .populate('replies')
-            .populate('articles');
+            .populate('articles')
+            .populate('articleCount')
+            .populate('commentCount')
+            .populate('replyCount')
+            .populate('viewCount')
+            .populate('likeCount');
         if (!user) {
             return res.status(404).json({error: 'user not found'});
         }
