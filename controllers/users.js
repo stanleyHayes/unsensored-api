@@ -66,7 +66,7 @@ exports.updateUser = async (req, res) => {
             return res.status(404).json({error: 'user not found'});
         }
         const updates = Object.keys(req.body);
-        const allowedUpdates = ['email', 'username', 'password', 'name', 'isActive'];
+        const allowedUpdates = ['email', 'username', 'password', 'name', 'isActive', 'birthday', 'profile'];
         const isAllowed = updates.every(update => allowedUpdates.includes(update));
         if (!isAllowed) {
             return res.status(400).json({error: 'update not allowed '});
