@@ -131,10 +131,9 @@ exports.updateProfile = async (req, res) => {
         for (let key of updates) {
             req.user[key] = req.body[key];
         }
-        if (req.file.buffer) {
+        if (req.file && req.file.buffer) {
             req.user['avatar'] = parser.format('.png', req.file.buffer).content;
         }
-        console.log(req.user.name, req.user.email, req.user.username)
         await req.user.save();
 
         req.user.populate({
@@ -162,7 +161,6 @@ exports.updateProfile = async (req, res) => {
 
         res.status(200).json({data: req.user});
     } catch (e) {
-        console.log(e.message)
         res.status(500).json({error: e.message});
     }
 }
