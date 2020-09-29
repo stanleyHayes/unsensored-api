@@ -78,12 +78,17 @@ exports.getArticles = async (req, res) => {
             match.published = Boolean(req.query.published);
         }
 
+
         //api/v1/articles?tags=&sortBy=field:value&published=value&
         query = Article.find({...match});
 
         if (req.query.tags) {
             const tags = req.query.tags.split(',');
             query = Article.find({...match, $all: {tags: [tags]}});
+        }
+
+        if(req.params.user){
+            query = query.where({author: req.params.user});
         }
 
         query = query
