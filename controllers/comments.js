@@ -13,7 +13,7 @@ exports.createComment = async (req, res) => {
             .populate({
                 path: 'author',
                 select: 'name username avatar'
-            }).populate('replyCount').populate('likeCount');
+            }).populate('replyCount').populate('likeCount').populate('likes');
         return res.status(201).json({data: comment});
     } catch (e) {
         return res.status(500).json({error: e.message});
@@ -54,7 +54,7 @@ exports.getComments = async (req, res) => {
                 .populate({
                     path: 'author',
                     select: 'name username avatar _id'
-                }).populate('likeCount').populate('replyCount');
+                }).populate('likeCount').populate('replyCount').populate('likes');
             return res.status(200).json({data: comments});
         }
         return res.status(200).json({data: []});

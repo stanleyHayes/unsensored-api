@@ -14,7 +14,7 @@ exports.createReply = async (req, res) => {
         reply = await Reply.findById(reply._id).populate({
             path: 'author',
             select: '_id name username avatar'
-        }).populate('likeCount');
+        }).populate('likeCount').populate('likes');
 
         return res.status(201).json({data: reply});
     } catch (e) {
@@ -28,7 +28,7 @@ exports.getReply = async (req, res) => {
             .populate({
                 path: 'author',
                 select: 'name username avatar'
-            }).populate('likeCount');
+            }).populate('likeCount').populate('likes');
         if (!reply) {
             return res.status(400).json({error: 'comment not found'});
         }
