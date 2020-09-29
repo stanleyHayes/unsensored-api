@@ -47,7 +47,7 @@ exports.getReplies = async (req, res) => {
                 .populate({
                     path: 'author',
                     select: 'name username avatar'
-                }).populate('likeCount');
+                }).populate('likeCount').populate('likes');
             return res.status(200).json({data: replies});
         }
 

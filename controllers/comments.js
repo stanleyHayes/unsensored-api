@@ -45,7 +45,7 @@ exports.getComments = async (req, res) => {
                 .populate({
                     path: 'author',
                     select: 'name username avatar _id'
-                }).populate('likeCount').populate('replyCount');
+                }).populate('likeCount').populate('replyCount').populate('likes');
             return res.status(200).json({data: comments});
         }
         //api/v1/articles/:article/comments
