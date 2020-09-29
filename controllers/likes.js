@@ -22,21 +22,23 @@ exports.toggleLike = async (req, res) => {
             switch (type) {
                 case 'ARTICLE':
                     like = new Like({type: 'ARTICLE', author: req.user._id, article});
+                    await like.save();
                     break;
                 case 'COMMENT':
                     like = new Like({type: 'COMMENT', author: req.user._id, comment});
+                    await like.save();
                     break;
                 case 'REPLY':
                     like = new Like({type: 'REPLY', author: req.user._id, reply});
+                    await like.save();
                     break;
             }
-            await like.save();
         } else {
-            console.log('removing like')
             await like.remove();
         }
         res.status(200).json({data: like});
     } catch (e) {
+        console.log(e.message);
         res.status(500).json({error: e.message});
     }
 }

@@ -102,6 +102,8 @@ exports.getArticles = async (req, res) => {
             })
             .populate({
                 path: 'viewCount'
+            }).populate({
+                path: 'likes'
             });
 
         const articles = await query;
