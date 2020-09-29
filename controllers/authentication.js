@@ -123,7 +123,7 @@ exports.changePassword = async (req, res) => {
 exports.updateProfile = async (req, res) => {
     try {
         const updates = Object.keys(req.body);
-        const allowedUpdates = ['username', "name", 'email'];
+        const allowedUpdates = ['username', "name", 'email', 'birthday', 'profile'];
         const isAllowed = updates.every(update => allowedUpdates.includes(update));
         if (!isAllowed) {
             return res.status(400).json({error: 'action not allowed'});
