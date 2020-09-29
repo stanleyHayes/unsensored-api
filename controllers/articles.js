@@ -61,33 +61,32 @@ exports.getArticle = async (req, res) => {
 exports.getArticles = async (req, res) => {
     try {
         let query;
-        let page = req.query.page || 1;
-        let limit = parseInt(req.query.limit) || 20;
+        let page = req.query && req.query.page || 1;
+        let limit = req.query && parseInt(req.query.limit) || 20;
         let skip = (page - 1) * limit;
         let sort = {
             updatedAt: -1
         };
         let match = {};
 
-        if (req.query.sortBy) {
+        if (req.query && req.query.sortBy) {
             let parts = req.query.sort.split(':');
             sort['datePublished'] = parts[1] === 'asc' ? 1 : -1;
         }
 
-        if (req.query.published) {
+        if (req.query && req.query.published) {
             match.published = Boolean(req.query.published);
         }
-
 
         //api/v1/articles?tags=&sortBy=field:value&published=value&
         query = Article.find({...match});
 
-        if (req.query.tags) {
+        if (req.query && req.query.tags) {
             const tags = req.query.tags.split(',');
             query = Article.find({...match, $all: {tags: [tags]}});
         }
 
-        if(req.params.user){
+        if(req.params && req.params.user){
             query = query.where({author: req.params.user});
         }
 
@@ -114,6 +113,8 @@ exports.getArticles = async (req, res) => {
         const articles = await query;
         return res.status(200).json({data: articles});
     } catch (e) {
+        console.log('error')
+        console.log(e.message)
         return res.status(500).json({error: e.message});
     }
 }

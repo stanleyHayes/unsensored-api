@@ -31,6 +31,6 @@ router.get('/', auth, getArticles);
 router.get('/me', auth, getAuthoredArticles);
 router.delete('/:id', auth, deleteArticle);
 router.patch('/:id', auth, article.single('banner'), updateArticle, articleError);
-router.get('/:id', getArticle);
+router.get('/:id', auth, getArticle);
 
 module.exports = router;
