@@ -113,8 +113,6 @@ exports.getArticles = async (req, res) => {
         const articles = await query;
         return res.status(200).json({data: articles});
     } catch (e) {
-        console.log('error')
-        console.log(e.message)
         return res.status(500).json({error: e.message});
     }
 }
@@ -222,6 +220,15 @@ exports.getAuthoredArticles = async (req, res) => {
             .populate({
                 path: 'author',
                 select: 'avatar name username'
+            })
+            .populate({
+                path: 'comments'
+            })
+            .populate({
+                path: 'likes'
+            })
+            .populate({
+                path: 'views'
             })
             .populate({
                 path: 'commentCount'
