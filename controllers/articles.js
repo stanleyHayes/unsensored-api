@@ -16,6 +16,30 @@ exports.createArticle = async (req, res) => {
         });
 
         await article.save();
+
+        article = await Article.findById(article._id)
+            .populate({
+                path: 'author',
+                select: 'avatar name username'
+            })
+            .populate({
+                path: 'comments'
+            })
+            .populate({
+                path: 'likes'
+            })
+            .populate({
+                path: 'views'
+            })
+            .populate({
+                path: 'commentCount'
+            })
+            .populate({
+                path: 'likeCount'
+            })
+            .populate({
+                path: 'viewCount'
+            });
         res.status(201).json({
             data: article
         });
@@ -86,7 +110,7 @@ exports.getArticles = async (req, res) => {
             query = Article.find({...match, $all: {tags: [tags]}});
         }
 
-        if(req.params && req.params.user){
+        if (req.params && req.params.user) {
             query = query.where({author: req.params.user});
         }
 
