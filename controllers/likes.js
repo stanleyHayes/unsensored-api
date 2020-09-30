@@ -42,6 +42,7 @@ exports.toggleLike = async (req, res) => {
         }
         res.status(200).json({data: like, action});
     } catch (e) {
+        console.log(e.message)
         res.status(500).json({error: e.message});
     }
 }
