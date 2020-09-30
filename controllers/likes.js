@@ -60,12 +60,32 @@ exports.getLikesByCategory = async (req, res) => {
                 .populate({path: 'author', select: 'name _id username avatar'});
         } else if (req.params.comment) {
             likes = await Like.find({comment: req.params.comment})
-                .populate({path: 'author', select: '_id name username'});
+                .populate({path: 'author', select: '_id name username avatar'});
         } else if (req.params.reply) {
             likes = await Like.find({reply: req.params.reply})
-                .populate({path: 'author', select: '_id name username'});
+                .populate({path: 'author', select: '_id name username avatar'});
         } else if (req.params.user) {
-            likes = await Like.find({author: req.params.user}).populate('comment').populate('article').populate('like');
+            likes = await Like.find({author: req.params.user})
+                .populate({
+                    path: 'comment',
+                    populate: {
+                        path: 'likes replyCount likeCount author'
+                    }
+                })
+                .populate({
+                    path: 'article',
+                    populate: {
+                        path: 'likes replyCount likeCount commentCount viewCount author'
+                    }
+                })
+                .populate('like')
+                .populate({
+                    path: 'reply',
+                    populate: {
+                        path: 'likes likeCount author'
+                    }
+                })
+                .populate('author');
         }
         res.status(200).json({data: likes});
     } catch (e) {
