@@ -2,43 +2,46 @@ const Like = require('../models/like');
 
 exports.toggleLike = async (req, res) => {
     try {
-        let like = await Like.findOne(
-            {
-                $and: [
-                    {author: req.user._id},
-                    {
-                        $or:
-                            [
-                                {comment: req.body.comment},
-                                {reply: req.body.reply},
-                                {article: req.body.article}
-                            ]
-                    }
-                ]
-            });
-
+        let like = null;
+        let action;
         const {comment, reply, article, type} = req.body;
-        if (!like) {
-            switch (type) {
-                case 'ARTICLE':
+        switch (type) {
+            case 'ARTICLE':
+                like = await Like.findOne({type: 'ARTICLE', author: req.user._id, article});
+                if (!like) {
                     like = new Like({type: 'ARTICLE', author: req.user._id, article});
                     await like.save();
-                    break;
-                case 'COMMENT':
+                    action = 'ADD';
+                } else {
+                    like.remove();
+                    action = 'REMOVE';
+                }
+                break;
+            case 'COMMENT':
+                like = await Like.findOne({type: 'COMMENT', author: req.user._id, comment});
+                if (!like) {
                     like = new Like({type: 'COMMENT', author: req.user._id, comment});
                     await like.save();
-                    break;
-                case 'REPLY':
+                    action = 'ADD';
+                } else {
+                    like.remove();
+                    action = 'REMOVE';
+                }
+                break;
+            case 'REPLY':
+                like = await Like.findOne({type: 'REPLY', author: req.user._id, reply});
+                if (!like) {
                     like = new Like({type: 'REPLY', author: req.user._id, reply});
                     await like.save();
-                    break;
-            }
-        } else {
-            await like.remove();
+                    action = 'ADD';
+                } else {
+                    like.remove();
+                    action = 'REMOVE';
+                }
+                break;
         }
-        res.status(200).json({data: like});
+        res.status(200).json({data: like, action});
     } catch (e) {
-        console.log(e.message);
         res.status(500).json({error: e.message});
     }
 }
@@ -60,7 +63,7 @@ exports.getLikesByCategory = async (req, res) => {
         } else if (req.params.reply) {
             likes = await Like.find({reply: req.params.reply})
                 .populate({path: 'author', select: '_id name username'});
-        }else if(req.params.user){
+        } else if (req.params.user) {
             likes = await Like.find({author: req.params.user}).populate('comment').populate('article').populate('like');
         }
         res.status(200).json({data: likes});
