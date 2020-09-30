@@ -41,7 +41,7 @@ exports.getComments = async (req, res) => {
         let comments = [];
         //api/v1/users/:user/comments
         if (req.params.user) {
-            comments = await Comment({author: req.params.user})
+            comments = await Comment.find({author: req.params.user})
                 .populate({
                     path: 'author',
                     select: 'name username avatar _id'
