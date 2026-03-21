@@ -14,13 +14,6 @@ const app = express();
 // --- Security ---
 app.use(helmet());
 app.use(cors());
-if (NODE_ENV !== 'development') {
-    app.use(rateLimit({
-        windowMs: 15 * 60 * 1000,
-        max: 100,
-        skip: (req) => req.path.startsWith('/socket.io'),
-    }));
-}
 
 // --- Body parsing ---
 app.use(express.json());

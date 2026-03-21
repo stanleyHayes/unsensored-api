@@ -7,6 +7,9 @@ const POPULATE_USER = [
     { path: 'views', populate: { path: 'article', select: 'summary _id title' } },
     { path: 'comments', populate: { path: 'article', select: '_id title' } },
     { path: 'likes' },
+    { path: 'articleCount' },
+    { path: 'commentCount' },
+    { path: 'likeCount' },
 ];
 
 exports.register = catchAsync(async (req, res) => {
