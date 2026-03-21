@@ -1,7 +1,9 @@
+const mongoose = require('mongoose');
 const Article = require('../models/article');
 const AppError = require('../utils/app-error');
 const catchAsync = require('../utils/catch-async');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinary');
+const { emitEvent } = require('../socket');
 
 const POPULATE_ARTICLE = [
     { path: 'author', select: 'avatar name username' },
@@ -38,6 +40,9 @@ exports.createArticle = catchAsync(async (req, res) => {
     });
 
     await article.populate(POPULATE_ARTICLE_FULL);
+
+    emitEvent(null, 'article:created', article);
+
     res.status(201).json({ success: true, data: article });
 });
 
@@ -75,6 +80,139 @@ exports.getArticles = catchAsync(async (req, res) => {
         Article.find(filter).skip(skip).limit(limit).sort(sort).populate(POPULATE_ARTICLE),
         Article.countDocuments(filter),
     ]);
+
+    res.status(200).json({
+        success: true,
+        data: articles,
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
+});
+
+exports.getTrendingArticles = catchAsync(async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 6;
+    const skip = (page - 1) * limit;
+
+    const now = new Date();
+
+    const pipeline = [
+        // Only published articles
+        { $match: { published: true } },
+
+        // Lookup like count
+        {
+            $lookup: {
+                from: 'likes',
+                localField: '_id',
+                foreignField: 'article',
+                as: '_likes',
+            },
+        },
+
+        // Lookup comment count
+        {
+            $lookup: {
+                from: 'comments',
+                localField: '_id',
+                foreignField: 'article',
+                as: '_comments',
+            },
+        },
+
+        // Lookup view count
+        {
+            $lookup: {
+                from: 'views',
+                localField: '_id',
+                foreignField: 'article',
+                as: '_views',
+            },
+        },
+
+        // Lookup bookmark count
+        {
+            $lookup: {
+                from: 'bookmarks',
+                localField: '_id',
+                foreignField: 'article',
+                as: '_bookmarks',
+            },
+        },
+
+        // Calculate trending score with time decay
+        {
+            $addFields: {
+                likeCount: { $size: '$_likes' },
+                commentCount: { $size: '$_comments' },
+                viewCount: { $size: '$_views' },
+                bookmarkCount: { $size: '$_bookmarks' },
+                _ageInDays: {
+                    $divide: [
+                        { $subtract: [now, { $ifNull: ['$datePublished', '$createdAt'] }] },
+                        1000 * 60 * 60 * 24, // ms per day
+                    ],
+                },
+            },
+        },
+        {
+            $addFields: {
+                // Weighted engagement score
+                _engagementScore: {
+                    $add: [
+                        { $multiply: ['$likeCount', 3] },
+                        { $multiply: ['$commentCount', 5] },
+                        { $multiply: ['$viewCount', 1] },
+                        { $multiply: ['$bookmarkCount', 4] },
+                    ],
+                },
+                // Recency bonus: 1 / (1 + ageInDays) — newer articles get a multiplier closer to 1
+                _recencyMultiplier: {
+                    $divide: [1, { $add: [1, '$_ageInDays'] }],
+                },
+            },
+        },
+        {
+            $addFields: {
+                trendingScore: {
+                    $multiply: ['$_engagementScore', '$_recencyMultiplier'],
+                },
+            },
+        },
+
+        // Sort by trending score descending
+        { $sort: { trendingScore: -1 } },
+
+        // Facet for pagination + total count in a single query
+        {
+            $facet: {
+                articles: [
+                    { $skip: skip },
+                    { $limit: limit },
+                    // Clean up temporary fields
+                    {
+                        $project: {
+                            _likes: 0,
+                            _comments: 0,
+                            _views: 0,
+                            _bookmarks: 0,
+                            _ageInDays: 0,
+                            _engagementScore: 0,
+                            _recencyMultiplier: 0,
+                        },
+                    },
+                ],
+                totalCount: [{ $count: 'count' }],
+            },
+        },
+    ];
+
+    const [result] = await Article.aggregate(pipeline);
+
+    const articles = result.articles;
+    const total = result.totalCount[0]?.count || 0;
+
+    // Populate author on the aggregation results
+    await Article.populate(articles, { path: 'author', select: 'avatar name username' });
 
     res.status(200).json({
         success: true,
@@ -138,7 +276,24 @@ exports.updateArticle = catchAsync(async (req, res) => {
     await article.save();
     await article.populate(POPULATE_ARTICLE_FULL);
 
+    emitEvent(`article:${article._id}`, 'article:updated', article);
+
     res.status(200).json({ success: true, data: article });
+});
+
+exports.getTags = catchAsync(async (req, res) => {
+    const limit = parseInt(req.query.limit) || 20;
+
+    const tags = await Article.aggregate([
+        { $match: { published: true } },
+        { $unwind: '$tags' },
+        { $group: { _id: '$tags', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: limit },
+        { $project: { _id: 0, tag: '$_id', count: 1 } },
+    ]);
+
+    res.status(200).json({ success: true, data: tags });
 });
 
 exports.deleteArticle = catchAsync(async (req, res) => {
@@ -151,5 +306,8 @@ exports.deleteArticle = catchAsync(async (req, res) => {
     }
 
     await article.deleteOne();
+
+    emitEvent(null, 'article:deleted', { _id: article._id });
+
     res.status(200).json({ success: true, data: article });
 });

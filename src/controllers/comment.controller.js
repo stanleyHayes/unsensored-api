@@ -1,6 +1,9 @@
 const Comment = require('../models/comment');
+const Article = require('../models/article');
 const AppError = require('../utils/app-error');
 const catchAsync = require('../utils/catch-async');
+const { emitEvent } = require('../socket');
+const createNotification = require('../utils/create-notification');
 
 const POPULATE_COMMENT = [
     { path: 'author', select: 'name username avatar' },
@@ -17,6 +20,12 @@ exports.createComment = catchAsync(async (req, res) => {
     });
 
     await comment.populate(POPULATE_COMMENT);
+
+    emitEvent(`article:${comment.article}`, 'comment:created', comment);
+
+    const articleDoc = await Article.findById(comment.article).select('author').lean();
+    if (articleDoc) createNotification({ recipient: articleDoc.author, sender: req.user._id, type: 'COMMENT_ARTICLE', article: comment.article, comment: comment._id });
+
     res.status(201).json({ success: true, data: comment });
 });
 
@@ -57,6 +66,8 @@ exports.updateComment = catchAsync(async (req, res) => {
     await comment.save();
     await comment.populate(POPULATE_COMMENT);
 
+    emitEvent(`article:${comment.article}`, 'comment:updated', comment);
+
     res.status(200).json({ success: true, data: comment });
 });
 
@@ -64,6 +75,10 @@ exports.deleteComment = catchAsync(async (req, res) => {
     const comment = await Comment.findOne({ _id: req.params.id, author: req.user._id });
     if (!comment) throw new AppError('Comment not found', 404);
 
+    const articleId = comment.article;
     await comment.deleteOne();
+
+    emitEvent(`article:${articleId}`, 'comment:deleted', { _id: comment._id, article: articleId });
+
     res.status(200).json({ success: true, data: comment });
 });

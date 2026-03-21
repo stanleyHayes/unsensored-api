@@ -14,8 +14,10 @@ router.use('/:article/views',    require('./view.routes'));
 
 router.post('/',     authenticate, bannerUpload.single('banner'), ctrl.createArticle);
 router.get('/',      authenticate, validate(schema.queryArticles, 'query'), ctrl.getArticles);
-router.get('/me',    authenticate, ctrl.getAuthoredArticles);
-router.get('/:id',   authenticate, ctrl.getArticle);
+router.get('/me',       authenticate, ctrl.getAuthoredArticles);
+router.get('/trending', authenticate, ctrl.getTrendingArticles);
+router.get('/tags',     authenticate, ctrl.getTags);
+router.get('/:id',      authenticate, ctrl.getArticle);
 router.patch('/:id', authenticate, bannerUpload.single('banner'), ctrl.updateArticle);
 router.delete('/:id', authenticate, ctrl.deleteArticle);
 

@@ -47,6 +47,7 @@ articleSchema.pre('deleteOne', { document: true, query: false }, async function 
     await mongoose.model('Reply').deleteMany({ article: this._id });
     await mongoose.model('Like').deleteMany({ article: this._id });
     await mongoose.model('View').deleteMany({ article: this._id });
+    await mongoose.model('Notification').deleteMany({ article: this._id });
 });
 
 module.exports = mongoose.model('Article', articleSchema);

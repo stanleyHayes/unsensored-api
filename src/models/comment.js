@@ -32,6 +32,7 @@ commentSchema.virtual('replyCount', {
 commentSchema.pre('deleteOne', { document: true, query: false }, async function () {
     await mongoose.model('Reply').deleteMany({ comment: this._id });
     await mongoose.model('Like').deleteMany({ comment: this._id });
+    await mongoose.model('Notification').deleteMany({ comment: this._id });
 });
 
 module.exports = mongoose.model('Comment', commentSchema);

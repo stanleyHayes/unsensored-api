@@ -6,7 +6,7 @@ exports.createView = catchAsync(async (req, res) => {
     const view = await View.findOneAndUpdate(
         { author: req.user._id, article: req.body.article },
         { author: req.user._id, article: req.body.article },
-        { upsert: true, new: true },
+        { upsert: true, returnDocument: 'after' },
     );
 
     res.status(201).json({ success: true, data: view });

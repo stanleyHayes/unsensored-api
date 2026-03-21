@@ -14,9 +14,9 @@ const likeSchema = new Schema({
     toObject: { virtuals: true },
 });
 
-// Prevent duplicate likes
-likeSchema.index({ author: 1, article: 1, type: 1 }, { unique: true, sparse: true });
-likeSchema.index({ author: 1, comment: 1, type: 1 }, { unique: true, sparse: true });
-likeSchema.index({ author: 1, reply: 1, type: 1 },   { unique: true, sparse: true });
+// Prevent duplicate likes — use partialFilterExpression so null fields don't collide
+likeSchema.index({ author: 1, article: 1 }, { unique: true, partialFilterExpression: { type: 'ARTICLE' } });
+likeSchema.index({ author: 1, comment: 1 }, { unique: true, partialFilterExpression: { type: 'COMMENT' } });
+likeSchema.index({ author: 1, reply: 1 },   { unique: true, partialFilterExpression: { type: 'REPLY' } });
 
 module.exports = mongoose.model('Like', likeSchema);
