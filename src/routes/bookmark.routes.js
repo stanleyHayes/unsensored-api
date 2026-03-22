@@ -7,6 +7,6 @@ const router = Router({ mergeParams: true });
 router.post('/',          authenticate, ctrl.toggleBookmark);
 router.get('/me',         authenticate, ctrl.getMyBookmarks);
 router.get('/me/ids',     authenticate, ctrl.getMyBookmarkIds);
-router.get('/article/:articleId', authenticate, ctrl.getBookmarksByArticle);
+router.get('/article/:articleId', ctrl.getBookmarksByArticle);
 
 module.exports = router;

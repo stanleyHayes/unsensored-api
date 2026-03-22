@@ -9,8 +9,8 @@ const router = Router({ mergeParams: true });
 router.use('/:reply/likes', require('./like.routes'));
 
 router.post('/',       authenticate, validate(schema.createReply), ctrl.createReply);
-router.get('/',        authenticate, ctrl.getReplies);
-router.get('/:id',     authenticate, ctrl.getReply);
+router.get('/',        ctrl.getReplies);
+router.get('/:id',     ctrl.getReply);
 router.patch('/:id',   authenticate, validate(schema.updateReply), ctrl.updateReply);
 router.delete('/:id',  authenticate, ctrl.deleteReply);
 

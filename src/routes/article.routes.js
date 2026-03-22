@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, optionalAuth } = require('../middleware/auth');
 const { bannerUpload } = require('../middleware/upload');
 const validate = require('../middleware/validate');
 const schema = require('../validators/article.validator');
@@ -13,11 +13,11 @@ router.use('/:article/comments', require('./comment.routes'));
 router.use('/:article/views',    require('./view.routes'));
 
 router.post('/',     authenticate, bannerUpload.single('banner'), ctrl.createArticle);
-router.get('/',      authenticate, validate(schema.queryArticles, 'query'), ctrl.getArticles);
+router.get('/',      optionalAuth, validate(schema.queryArticles, 'query'), ctrl.getArticles);
 router.get('/me',       authenticate, ctrl.getAuthoredArticles);
-router.get('/trending', authenticate, ctrl.getTrendingArticles);
-router.get('/tags',     authenticate, ctrl.getTags);
-router.get('/:id',      authenticate, ctrl.getArticle);
+router.get('/trending', optionalAuth, ctrl.getTrendingArticles);
+router.get('/tags',     ctrl.getTags);
+router.get('/:id',      optionalAuth, ctrl.getArticle);
 router.patch('/:id', authenticate, bannerUpload.single('banner'), ctrl.updateArticle);
 router.delete('/:id', authenticate, ctrl.deleteArticle);
 

@@ -2,6 +2,11 @@ const View = require('../models/view');
 const catchAsync = require('../utils/catch-async');
 
 exports.createView = catchAsync(async (req, res) => {
+    // Skip tracking for unauthenticated users
+    if (!req.user) {
+        return res.status(200).json({ success: true, data: null });
+    }
+
     // Upsert — if already viewed, no-op
     const view = await View.findOneAndUpdate(
         { author: req.user._id, article: req.body.article },

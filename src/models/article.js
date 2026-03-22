@@ -24,8 +24,10 @@ const virtualDefs = [
     { name: 'likeCount',    ref: 'Like',    count: true  },
     { name: 'comments',     ref: 'Comment', count: false },
     { name: 'commentCount', ref: 'Comment', count: true  },
-    { name: 'views',        ref: 'View',    count: false },
-    { name: 'viewCount',    ref: 'View',    count: true  },
+    { name: 'views',         ref: 'View',     count: false },
+    { name: 'viewCount',     ref: 'View',     count: true  },
+    { name: 'bookmarks',     ref: 'Bookmark', count: false },
+    { name: 'bookmarkCount', ref: 'Bookmark', count: true  },
 ];
 
 for (const { name, ref, count } of virtualDefs) {

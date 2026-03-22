@@ -1,9 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const morgan = require('morgan');
 const useragent = require('express-useragent');
-const rateLimit = require('express-rate-limit');
+const logger = require('./middleware/logger');
 const { NODE_ENV } = require('./config/config');
 const routes = require('./routes');
 const errorHandler = require('./middleware/error-handler');
@@ -21,9 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(useragent.express());
 
 // --- Logging ---
-if (NODE_ENV === 'development') {
-    app.use(morgan('dev'));
-}
+app.use(logger);
 
 // --- Health check ---
 app.get('/health', (_req, res) => {

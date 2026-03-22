@@ -10,6 +10,7 @@ const POPULATE_ARTICLE = [
     { path: 'commentCount' },
     { path: 'likeCount' },
     { path: 'viewCount' },
+    { path: 'bookmarkCount' },
     { path: 'likes' },
 ];
 

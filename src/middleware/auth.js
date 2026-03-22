@@ -23,6 +23,24 @@ const authenticate = catchAsync(async (req, _res, next) => {
     next();
 });
 
+const optionalAuth = catchAsync(async (req, _res, next) => {
+    const header = req.headers.authorization;
+    if (header?.startsWith('Bearer ')) {
+        try {
+            const token = header.split(' ')[1];
+            const decoded = jwt.verify(token, JWT_SECRET);
+            const user = await User.findOne({ _id: decoded._id, 'tokens.token': token });
+            if (user) {
+                req.user = user;
+                req.token = token;
+            }
+        } catch {
+            // Invalid token — continue as unauthenticated
+        }
+    }
+    next();
+});
+
 const authorize = (...roles) => (req, _res, next) => {
     if (!roles.includes(req.user.role)) {
         throw new AppError('Insufficient permissions', 403);
@@ -30,4 +48,4 @@ const authorize = (...roles) => (req, _res, next) => {
     next();
 };
 
-module.exports = { authenticate, authorize };
+module.exports = { authenticate, optionalAuth, authorize };

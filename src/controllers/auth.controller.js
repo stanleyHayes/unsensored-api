@@ -42,25 +42,20 @@ exports.getMe = catchAsync(async (req, res) => {
 exports.updateProfile = catchAsync(async (req, res) => {
     const updates = req.body;
     Object.assign(req.user, updates);
-
     if (req.file) {
         // Delete old avatar from cloudinary
         if (req.user.avatarPublicId) {
             await deleteFromCloudinary(req.user.avatarPublicId);
         }
-
         const { url, publicId } = await uploadToCloudinary(req.file.buffer, {
             folder: 'unsensored/avatars',
             transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face', quality: 'auto' }],
         });
-
         req.user.avatar = url;
         req.user.avatarPublicId = publicId;
     }
-
     await req.user.save();
     await req.user.populate(POPULATE_USER);
-
     res.status(200).json({ success: true, data: req.user });
 });
 
