@@ -4,6 +4,7 @@ const AppError = require('../utils/app-error');
 const catchAsync = require('../utils/catch-async');
 const { emitEvent } = require('../socket');
 const createNotification = require('../utils/create-notification');
+const updateTagAffinity = require('../utils/update-tag-affinity');
 
 const POPULATE_COMMENT = [
     { path: 'author', select: 'name username avatar' },
@@ -23,8 +24,11 @@ exports.createComment = catchAsync(async (req, res) => {
 
     emitEvent(`article:${comment.article}`, 'comment:created', comment);
 
-    const articleDoc = await Article.findById(comment.article).select('author').lean();
-    if (articleDoc) createNotification({ recipient: articleDoc.author, sender: req.user._id, type: 'COMMENT_ARTICLE', article: comment.article, comment: comment._id });
+    const articleDoc = await Article.findById(comment.article).select('author tags').lean();
+    if (articleDoc) {
+        createNotification({ recipient: articleDoc.author, sender: req.user._id, type: 'COMMENT_ARTICLE', article: comment.article, comment: comment._id });
+        updateTagAffinity(req.user._id, articleDoc.tags, 5);
+    }
 
     res.status(201).json({ success: true, data: comment });
 });

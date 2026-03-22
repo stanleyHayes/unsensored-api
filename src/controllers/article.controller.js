@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const Article = require('../models/article');
+const User = require('../models/user');
+const Follow = require('../models/follow');
 const AppError = require('../utils/app-error');
 const catchAsync = require('../utils/catch-async');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinary');
@@ -311,4 +313,203 @@ exports.deleteArticle = catchAsync(async (req, res) => {
     emitEvent(null, 'article:deleted', { _id: article._id });
 
     res.status(200).json({ success: true, data: article });
+});
+
+exports.getFollowingFeed = catchAsync(async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 6;
+    const skip = (page - 1) * limit;
+
+    const follows = await Follow.find({ follower: req.user._id }).select('following').lean();
+    const followingIds = follows.map((f) => f.following);
+
+    if (!followingIds.length) {
+        return res.status(200).json({
+            success: true,
+            data: [],
+            message: 'Follow some authors to see their articles here',
+            pagination: { page, limit, total: 0, totalPages: 0 },
+        });
+    }
+
+    const filter = { author: { $in: followingIds }, published: true };
+
+    const [articles, total] = await Promise.all([
+        Article.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 }).populate(POPULATE_ARTICLE),
+        Article.countDocuments(filter),
+    ]);
+
+    res.status(200).json({
+        success: true,
+        data: articles,
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
+});
+
+exports.getForYouFeed = catchAsync(async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 6;
+    const skip = (page - 1) * limit;
+
+    const now = new Date();
+
+    // Get user's tag affinities
+    const user = await User.findById(req.user._id).select('tagAffinities').lean();
+    const affinities = (user?.tagAffinities || []).sort((a, b) => b.score - a.score);
+    const affinityTags = affinities.map((a) => a.tag);
+
+    // Build a map of tag -> score for the $switch in aggregation
+    const tagScoreEntries = affinities.map((a) => ({
+        case: { $eq: ['$$this', a.tag] },
+        then: a.score * 5,
+    }));
+
+    // Get followed user IDs
+    const follows = await Follow.find({ follower: req.user._id }).select('following').lean();
+    const followingIds = follows.map((f) => f.following);
+
+    const pipeline = [
+        // Only published articles, exclude user's own
+        { $match: { published: true, author: { $ne: req.user._id } } },
+
+        // Lookup engagement counts
+        {
+            $lookup: {
+                from: 'likes',
+                localField: '_id',
+                foreignField: 'article',
+                as: '_likes',
+            },
+        },
+        {
+            $lookup: {
+                from: 'comments',
+                localField: '_id',
+                foreignField: 'article',
+                as: '_comments',
+            },
+        },
+        {
+            $lookup: {
+                from: 'views',
+                localField: '_id',
+                foreignField: 'article',
+                as: '_views',
+            },
+        },
+        {
+            $lookup: {
+                from: 'bookmarks',
+                localField: '_id',
+                foreignField: 'article',
+                as: '_bookmarks',
+            },
+        },
+
+        // Calculate scores
+        {
+            $addFields: {
+                likeCount: { $size: '$_likes' },
+                commentCount: { $size: '$_comments' },
+                viewCount: { $size: '$_views' },
+                bookmarkCount: { $size: '$_bookmarks' },
+                _ageInDays: {
+                    $divide: [
+                        { $subtract: [now, { $ifNull: ['$datePublished', '$createdAt'] }] },
+                        1000 * 60 * 60 * 24,
+                    ],
+                },
+            },
+        },
+        {
+            $addFields: {
+                // Tag match score: sum of affinity scores for matching tags
+                _tagMatchScore: affinityTags.length > 0
+                    ? {
+                        $reduce: {
+                            input: { $ifNull: ['$tags', []] },
+                            initialValue: 0,
+                            in: {
+                                $add: [
+                                    '$$value',
+                                    { $switch: { branches: tagScoreEntries, default: 0 } },
+                                ],
+                            },
+                        },
+                    }
+                    : 0,
+
+                // Follow score: +10 if author is followed
+                _followScore: followingIds.length > 0
+                    ? { $cond: [{ $in: ['$author', followingIds] }, 10, 0] }
+                    : 0,
+
+                // Engagement score
+                _engagementScore: {
+                    $add: [
+                        { $multiply: ['$likeCount', 3] },
+                        { $multiply: ['$commentCount', 5] },
+                        { $multiply: ['$viewCount', 1] },
+                        { $multiply: ['$bookmarkCount', 4] },
+                    ],
+                },
+
+                // Recency bonus
+                _recencyMultiplier: {
+                    $divide: [1, { $add: [1, '$_ageInDays'] }],
+                },
+            },
+        },
+        {
+            $addFields: {
+                totalScore: {
+                    $multiply: [
+                        { $add: ['$_tagMatchScore', '$_followScore', '$_engagementScore'] },
+                        '$_recencyMultiplier',
+                    ],
+                },
+            },
+        },
+
+        // Sort by total score descending
+        { $sort: { totalScore: -1 } },
+
+        // Facet for pagination + total count
+        {
+            $facet: {
+                articles: [
+                    { $skip: skip },
+                    { $limit: limit },
+                    {
+                        $project: {
+                            _likes: 0,
+                            _comments: 0,
+                            _views: 0,
+                            _bookmarks: 0,
+                            _ageInDays: 0,
+                            _tagMatchScore: 0,
+                            _followScore: 0,
+                            _engagementScore: 0,
+                            _recencyMultiplier: 0,
+                        },
+                    },
+                ],
+                totalCount: [{ $count: 'count' }],
+            },
+        },
+    ];
+
+    const [result] = await Article.aggregate(pipeline);
+
+    const articles = result.articles;
+    const total = result.totalCount[0]?.count || 0;
+
+    // Populate author on aggregation results
+    await Article.populate(articles, { path: 'author', select: 'avatar name username' });
+
+    res.status(200).json({
+        success: true,
+        data: articles,
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
 });

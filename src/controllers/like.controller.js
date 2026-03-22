@@ -5,6 +5,7 @@ const Reply = require('../models/reply');
 const catchAsync = require('../utils/catch-async');
 const { emitEvent } = require('../socket');
 const createNotification = require('../utils/create-notification');
+const updateTagAffinity = require('../utils/update-tag-affinity');
 
 const getArticleRoom = async (type, { article, comment, reply }) => {
     if (type === 'ARTICLE') return `article:${article}`;
@@ -52,6 +53,12 @@ exports.toggleLike = catchAsync(async (req, res) => {
         } else if (type === 'REPLY') {
             const doc = await Reply.findById(reply).select('author article comment').lean();
             if (doc) createNotification({ recipient: doc.author, sender: req.user._id, type: 'LIKE_REPLY', article: doc.article, comment: doc.comment, reply });
+        }
+
+        // Update tag affinities when liking an article
+        if (type === 'ARTICLE') {
+            const articleDoc = await Article.findById(article).select('tags').lean();
+            if (articleDoc) updateTagAffinity(req.user._id, articleDoc.tags, 3);
         }
 
         return res.status(201).json({ success: true, data: like, action: 'ADD' });

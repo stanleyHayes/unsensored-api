@@ -7,7 +7,7 @@ const notificationSchema = new Schema({
     sender:    { type: Schema.Types.ObjectId, ref: 'User', required: true },
     type: {
         type: String,
-        enum: ['LIKE_ARTICLE', 'LIKE_COMMENT', 'LIKE_REPLY', 'COMMENT_ARTICLE', 'REPLY_COMMENT'],
+        enum: ['LIKE_ARTICLE', 'LIKE_COMMENT', 'LIKE_REPLY', 'COMMENT_ARTICLE', 'REPLY_COMMENT', 'FOLLOW_USER'],
         required: true,
     },
     article: { type: Schema.Types.ObjectId, ref: 'Article' },

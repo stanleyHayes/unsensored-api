@@ -11,8 +11,9 @@ router.use('/:user/likes',    require('./like.routes'));
 router.use('/:user/views',    require('./view.routes'));
 router.use('/:user/replies',  require('./reply.routes'));
 
-router.get('/',      ctrl.getUsers);
-router.get('/:id',   ctrl.getUser);
+router.get('/',          ctrl.getUsers);
+router.get('/suggested', authenticate, ctrl.getSuggestedUsers);
+router.get('/:id',       ctrl.getUser);
 router.delete('/:id', authenticate, authorize('ADMIN', 'SUPER_ADMIN'), ctrl.deleteUser);
 
 module.exports = router;

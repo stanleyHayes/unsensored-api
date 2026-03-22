@@ -27,6 +27,18 @@ app.get('/health', (_req, res) => {
     res.status(200).json({ status: 'ok' });
 });
 
+// --- Open Graph routes (serve dynamic meta tags to link preview bots) ---
+const ogRoutes = require('./routes/og.routes');
+const BOT_UA = /bot|crawler|spider|facebook|whatsapp|telegram|slack|twitter|linkedin|discord|preview|fetch|curl/i;
+app.use('/og', ogRoutes);
+app.use('/articles/:id', (req, res, next) => {
+    const ua = req.get('user-agent') || '';
+    if (BOT_UA.test(ua)) {
+        return res.redirect(`/og/articles/${req.params.id}`);
+    }
+    next();
+});
+
 // --- API routes ---
 app.use('/api/v1', routes);
 

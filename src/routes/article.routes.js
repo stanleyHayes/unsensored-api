@@ -14,10 +14,12 @@ router.use('/:article/views',    require('./view.routes'));
 
 router.post('/',     authenticate, bannerUpload.single('banner'), ctrl.createArticle);
 router.get('/',      optionalAuth, validate(schema.queryArticles, 'query'), ctrl.getArticles);
-router.get('/me',       authenticate, ctrl.getAuthoredArticles);
-router.get('/trending', optionalAuth, ctrl.getTrendingArticles);
-router.get('/tags',     ctrl.getTags);
-router.get('/:id',      optionalAuth, ctrl.getArticle);
+router.get('/me',              authenticate, ctrl.getAuthoredArticles);
+router.get('/feed/following',  authenticate, ctrl.getFollowingFeed);
+router.get('/feed/for-you',    authenticate, ctrl.getForYouFeed);
+router.get('/trending',        optionalAuth, ctrl.getTrendingArticles);
+router.get('/tags',            ctrl.getTags);
+router.get('/:id',             optionalAuth, ctrl.getArticle);
 router.patch('/:id', authenticate, bannerUpload.single('banner'), ctrl.updateArticle);
 router.delete('/:id', authenticate, ctrl.deleteArticle);
 

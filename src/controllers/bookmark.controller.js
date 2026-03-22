@@ -1,6 +1,8 @@
 const Bookmark = require('../models/bookmark');
+const Article = require('../models/article');
 const catchAsync = require('../utils/catch-async');
 const { emitEvent } = require('../socket');
+const updateTagAffinity = require('../utils/update-tag-affinity');
 
 exports.toggleBookmark = catchAsync(async (req, res) => {
     const { article } = req.body;
@@ -16,6 +18,11 @@ exports.toggleBookmark = catchAsync(async (req, res) => {
     try {
         const bookmark = await Bookmark.create(filter);
         emitEvent(`article:${article}`, 'bookmark:toggled', { bookmark, action: 'ADD' });
+
+        // Update tag affinities on bookmark add
+        const articleDoc = await Article.findById(article).select('tags').lean();
+        if (articleDoc) updateTagAffinity(req.user._id, articleDoc.tags, 4);
+
         return res.status(201).json({ success: true, data: bookmark, action: 'ADD' });
     } catch (err) {
         if (err.code === 11000) {

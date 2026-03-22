@@ -11,5 +11,6 @@ router.use('/views',    require('./view.routes'));
 router.use('/likes',     require('./like.routes'));
 router.use('/bookmarks',      require('./bookmark.routes'));
 router.use('/notifications',  require('./notification.routes'));
+router.use('/follows',        require('./follow.routes'));
 
 module.exports = router;

@@ -56,6 +56,7 @@ const userSchema = new Schema({
     tokens: [tokenSchema],
     profile: String,
     birthday: Date,
+    tagAffinities: [{ tag: String, score: { type: Number, default: 0 } }],
 }, {
     timestamps: true,
     toJSON: { virtuals: true },
@@ -85,6 +86,22 @@ for (const { name, ref, count } of virtualDefs) {
         count,
     });
 }
+
+userSchema.virtual('followerCount', {
+    ref: 'Follow',
+    localField: '_id',
+    foreignField: 'following',
+    justOne: false,
+    count: true,
+});
+
+userSchema.virtual('followingCount', {
+    ref: 'Follow',
+    localField: '_id',
+    foreignField: 'follower',
+    justOne: false,
+    count: true,
+});
 
 // --- Hooks ---
 userSchema.pre('save', async function () {
